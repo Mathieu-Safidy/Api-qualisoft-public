@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 
 
 export async function setRouteCapacity(handler: (arg0: any, arg1: any) => any, req: any, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string }): any; new(): any } } }, capacity: any) {
@@ -61,8 +63,10 @@ export const catchAsync = (fn: any) => (req: any, res: any, next: any) => {
 
 export function capacityMiddleware(capacity: number | number[]) {
     return function (req: any, res: any, next: any) {
-        if (req.user && (typeof capacity == "number" && req.user.capacity >= capacity || Array.isArray(capacity) && capacity.includes(req.user.capacity))) {
-            next();
+        if(typeof capacity == 'number' && capacity <= parseInt(process.env.MAXIMUM_PERMIT || '0') || Array.isArray(capacity) && capacity.every(c => c <= parseInt(process.env.MAXIMUM_PERMIT || '0'))) {
+            if (req.user && (typeof capacity == "number" && req.user.capacity >= capacity || Array.isArray(capacity) && capacity.includes(req.user.capacity))) {
+                next();
+            }
         }
         else {
             return res.status(403).json({ message: "Forbidden" });
