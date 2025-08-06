@@ -64,6 +64,81 @@ export class ParametrageRepository {
                 id_client:              id_client
             });
 
+            const id_projet = (await clientConnect.query(
+                `INSERT INTO "detail_projet".projet 
+                (nom_interlocuteur, contact_interlocuteur, description_traitement, id_plan, id_cp, id_type_traitement,id_fonction, id_client , id_ligne) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+                RETURNING id_projet`, 
+                [  
+                    projet.nom_interlocuteur, 
+                    projet.contact_interlocuteur, 
+                    projet.description_traitement,
+                    projet.id_plan,  
+                    projet.id_cp, 
+                    projet.id_type_traitement, 
+                    projet.id_fonction,
+                    projet.id_client, 
+                    projet.id_ligne
+                ]
+            )).rows[0].id_projet;
+
+            const etape = parametrage.objectif_qualite || [];
+
+            let biblio : Record<string,number> = {};
+
+            let etape_qualite_list: {id_etape_qualite: number, operation: string}[] = [];
+            // let etape_qualite_list: Array<EtapeQualite> = [{ id_etape_qualite: 0, operation: '' }];
+            
+            for (const element of etape) {
+                
+                let ordre = 0;
+                if (element.operation_de_controle in biblio) {
+                    ordre = biblio[element.operation_de_controle];
+                    biblio[element.operation_de_controle] += 1;
+                } else {
+                    biblio[element.operation_de_controle] = 0;
+                }
+
+                const etape_qualite = (await clientConnect.query(
+                    `INSERT INTO "detail_projet".etape_qualite (
+                        seuil_qualite,
+                        coef_rejet,
+                        ordre,
+                        type_de_controle,
+                        id_unite_de_controle,
+                        operation_de_controle,
+                        operation_a_controle,
+                        id_projet
+                    ) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id_etape_qualite`,
+                    [
+                        element.seuil_qualite,
+                        element.coef_rejet,
+                        ordre,
+                        element.type_de_controle,
+                        element.id_unite_de_controle,
+                        element.operation_de_controle,
+                        element.operation_a_controle,
+                        id_projet
+                    ]
+                )).rows[0].id_etape_qualite;
+                
+                etape_qualite_list.push({
+                    id_etape_qualite: etape_qualite,
+                    operation: element.operation_de_controle
+                });
+            }
+
+            for(const typeErreur of parametrage.type_erreur) {
+                for (const colon of parametrage.colonne){
+                    const valable = typeErreur[colon];
+                    if(valable) {
+                        
+                    }
+                }
+            }
+
+
+
             
 
 

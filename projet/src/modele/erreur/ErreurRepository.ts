@@ -13,4 +13,14 @@ export class ErreurRepository {
             throw error;
         }
     }
+    
+    static async verify(name: string) {
+        try {
+            const result = await pool.query('SELECT * FROM "detail_projet".erreur_suggestion returning Id_erreur_suggestion');
+            return result.rows[0].Id_erreur_suggestion;
+        } catch (error) {
+            console.error("Erreur lors de la verification de l'erreur ")
+            throw error;
+        }
+    }
 }
