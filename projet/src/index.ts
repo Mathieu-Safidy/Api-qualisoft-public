@@ -8,6 +8,13 @@ import { Fonction } from "./fonction/fonction";
 import cookieParser from "cookie-parser";
 // import { setRouteCapacity, setUserMiddleware } from "./controller/tets";
 import parametrageRouter from "./router/parametrage"
+import * as dotenv from 'dotenv';
+import { initDb } from "./modele/database/db";
+
+// Setup environment
+dotenv.config();
+initDb()
+
 
 const routerPrincipal: Record<string, (req: Request, res: Response) => Promise<void>> = {
     login: Login.log,
@@ -33,7 +40,7 @@ const app = express();
 //     (app as any)[methode](url, async (req: any, res: any ,  next: any ) => await setUserMiddleware(req,res,next), async (req: any, res: any) => await setRouteCapacity(routerPrincipal[url], req, res, capacity))
 // }
 
-app.use(cors());
+app.use(cors({ credentials: true, origin: 'http://localhost:4200' }));
 app.use(cookieParser());
 const port = 5000;
 
@@ -49,7 +56,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // Swagger de login
-app.post("/login", Login.log);
 
 // verify role
 app.get("/verify/:page", Login.verifyRole)
@@ -58,6 +64,8 @@ app.get("/verify/:page", Login.verifyRole)
 // Verify token route
 app.get("/verify", Login.verifyToken)
 
+app.post("/api/login", Login.log);
+app.get("/api/logout", Login.logout);
 app.use("/api", parametrageRouter)
 
 app.listen(port, () => {
