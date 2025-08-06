@@ -6,7 +6,7 @@ import { Client } from "../client/Client";
 
 export class ParametrageRepository {
     static async create(parametrage: Parametrage): Promise<any> {
-        const clientConnect = await pool.connect();
+        const clientConnect = await pool!.connect();
         try {
             await clientConnect.query('BEGIN');
             // de base

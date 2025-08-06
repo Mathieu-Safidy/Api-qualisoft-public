@@ -1,6 +1,6 @@
 import { Pool } from 'pg'
 
-export let pool: any = undefined
+export let pool: Pool | undefined = undefined
 
 export function initDb() {
     console.log("Creating pool...")
