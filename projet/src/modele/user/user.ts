@@ -46,7 +46,7 @@ export class User {
 
     async verify() {
         try {
-            const result = await pool.query("SELECT * FROM \"geo\".user WHERE matricule = $1", [this.matricule]);
+            const result = await pool!.query("SELECT * FROM \"geo\".user WHERE matricule = $1", [this.matricule]);
             this.changeCapacite = result.rows[0].capacite as number;
             return this;
         } catch (error) {

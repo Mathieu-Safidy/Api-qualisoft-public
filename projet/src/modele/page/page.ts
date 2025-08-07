@@ -13,7 +13,7 @@ export class Page {
 
     static async verify (libelle: string) {
         try {
-            const result = await pool.query('select * from "detail_projet".link where libelle = $1 ',[libelle]);
+            const result = await pool!.query('select * from "detail_projet".link where libelle = $1 ',[libelle]);
             const value = result.rows[0];
             return new Page(
                 value.id_link,

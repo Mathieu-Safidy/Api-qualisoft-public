@@ -3,6 +3,7 @@ import { pool } from "../database/db";
 import { Parametrage } from "./parametrage";
 import { Projet } from "../projet/Projet";
 import { Client } from "../client/Client";
+import { ObjectifQualite } from "../objectIf/ObjectifQualite";
 
 export class ParametrageRepository {
     static async create(parametrage: Parametrage): Promise<any> {
@@ -64,7 +65,39 @@ export class ParametrageRepository {
                 id_client:              id_client
             });
 
-            
+            const id_projet = (await clientConnect.query('INSERT INTO "detail_projet".projet (nom_interlocuteur, contact_interlocuteur, description_traitement, id_ligne, id_plan, id_fonction, id_cp, id_type_traitement, id_client) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id_projet', [
+                projet.nom_interlocuteur,
+                projet.contact_interlocuteur,
+                projet.description_traitement,
+                projet.id_ligne,
+                projet.id_plan,
+                projet.id_fonction,
+                projet.id_cp,
+                projet.id_type_traitement,
+                projet.id_client
+            ])).rows[0].id_projet;
+
+            const ordre : Record<string, number> = {};
+
+            for (const objectif of parametrage.objectif_qualite) {
+                if (!ordre[objectif.operation_de_controle]) {
+                    ordre[objectif.operation_de_controle] = 1;
+                } 
+                const objectifQualite = new ObjectifQualite(objectif);
+                await clientConnect.query('INSERT INTO "detail_projet".etape_qualite (id_etape_qualite, seuil_qualite, coef_rejet, ordre, type_de_controle, id_unite_de_controle, operation_de_controle, operation_a_controle, id_projet) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
+                    objectifQualite.id_etape_qualite,
+                    objectifQualite.seuil_qualite,
+                    objectifQualite.coef_rejet,
+                    ordre[objectif.operation_de_controle],
+                    objectifQualite.type_de_controle,
+                    objectifQualite.id_unite_de_controle,
+                    objectifQualite.operation_de_controle,
+                    objectifQualite.operation_a_controle,
+                    id_projet
+                ]);
+                ordre[objectif.operation_de_controle]++;
+            }
+
 
 
             await clientConnect.query('COMMIT'); 
