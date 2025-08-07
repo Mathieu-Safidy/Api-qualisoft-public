@@ -6,6 +6,8 @@ export class TypeErreur {
     raccourci!: string;
     id_projet!: number;
 
+    control!: string[];
+
     constructor(init?: Partial<TypeErreur>) {
         Object.assign(this,init);
     }
