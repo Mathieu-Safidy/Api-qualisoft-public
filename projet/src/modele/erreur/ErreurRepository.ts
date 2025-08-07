@@ -3,6 +3,7 @@ import { Erreur } from "./Erreur";
 
 export class ErreurRepository {
     static async getAll() {
+
         try {
             const result = await pool.query('SELECT * FROM "detail_projet".erreur_suggestion');
             // console.log('Fetched error suggestions:', result.rows);

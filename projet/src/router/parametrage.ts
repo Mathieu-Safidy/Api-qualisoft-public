@@ -2,15 +2,33 @@ import { Request, Response, Router } from 'express'
 import { capacityMiddleware, catchAsync, setUserMiddleware, withCapacity } from '../controller/tets'
 import { ErreurRepository } from '../modele/erreur/ErreurRepository'
 import { ErreurController } from '../controller/ErreurController'
+import { VueActivite } from '../modele/vueActivite/VueActivite'
+import { TypeTraitementController } from '../controller/TypeTraitementController'
+import { VueActiviteController } from '../controller/VueActiviteController'
+import { OperationController } from '../controller/OperationController'
+import { UniteController } from '../controller/UniteController'
+import { ProjetController } from '../controller/ProjetController'
 
 const router = Router()
 
 // router.use()
 
-router.get('/parametrage', setUserMiddleware, capacityMiddleware(4), async (req: any, res: any) => {
-    return res.status(200).json({ message: 'Paramétrage reçu' })
-})
+// router.get('/parametrage', setUserMiddleware, capacityMiddleware(4), async (req: any, res: any) => {
+//     return res.status(200).json({ message: 'Paramétrage reçu' })
+// })
 
-router.get('/erreur', (ErreurController.getErreurSuggestions))
+router.get('/erreurs', catchAsync(ErreurController.getErreurSuggestions))
+
+router.post('/filtres', catchAsync(VueActiviteController.getByFilter))
+
+router.get('/typeTraitements', catchAsync(TypeTraitementController.getAllTypeTraitements))
+
+router.get('/operations', catchAsync(OperationController.getAllOperations))
+
+router.get('/unites', catchAsync(UniteController.getUnites))
+
+router.get('/projets' , catchAsync(ProjetController.getAll))
+
+// router.post('/parametrage', setUserMiddleware , capacityMiddleware(7) ,  )
 
 export default router
