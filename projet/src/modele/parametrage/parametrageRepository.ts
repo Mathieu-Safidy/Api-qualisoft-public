@@ -146,8 +146,8 @@ export class ParametrageRepository {
                     }
                 }
             }
-            
             await clientConnect.query('COMMIT');
+            return id_projet;
         } catch (error) {
             await clientConnect.query('ROLLBACK');
             throw error;

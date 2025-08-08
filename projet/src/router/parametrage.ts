@@ -8,6 +8,7 @@ import { VueActiviteController } from '../controller/VueActiviteController'
 import { OperationController } from '../controller/OperationController'
 import { UniteController } from '../controller/UniteController'
 import { ProjetController } from '../controller/ProjetController'
+import { ParametrageController } from '../controller/ParametrageController'
 
 const router = Router()
 
@@ -16,6 +17,8 @@ const router = Router()
 // router.get('/parametrage', setUserMiddleware, capacityMiddleware(4), async (req: any, res: any) => {
 //     return res.status(200).json({ message: 'Paramétrage reçu' })
 // })
+
+router.post('/parametrage', catchAsync(ParametrageController.create))
 
 router.get('/erreurs', catchAsync(ErreurController.getErreurSuggestions))
 
