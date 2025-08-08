@@ -8,11 +8,12 @@ import { Fonction } from "./fonction/fonction";
 import cookieParser from "cookie-parser";
 // import { setRouteCapacity, setUserMiddleware } from "./controller/tets";
 import parametrageRouter from "./router/parametrage"
+import { catchAsync } from "./controller/tets";
 
-const routerPrincipal: Record<string, (req: Request, res: Response) => Promise<void>> = {
-    login: Login.log,
-    // "get-parametrage": ParametrageController.getParametrage
-}
+// const routerPrincipal: Record<string, (req: Request, res: Response) => Promise<void>> = {
+//     login: Login.log,
+//     // "get-parametrage": ParametrageController.getParametrage
+// }
 
 const swaggerSpec = YAML.load(path.join(__dirname, "../swagger.yaml"));
 
@@ -33,7 +34,11 @@ const app = express();
 //     (app as any)[methode](url, async (req: any, res: any ,  next: any ) => await setUserMiddleware(req,res,next), async (req: any, res: any) => await setRouteCapacity(routerPrincipal[url], req, res, capacity))
 // }
 
-app.use(cors());
+app.use(cors(
+    {
+        origin: "http://localhost:4200",
+    }
+));
 app.use(cookieParser());
 const port = 5000;
 
@@ -49,10 +54,10 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // Swagger de login
-app.post("/login", Login.log);
+app.post("/api/login", catchAsync(Login.log));
 
 // verify role
-app.get("/verify/:page", Login.verifyRole)
+app.get("/verify/:page", catchAsync(Login.verifyRole))
 
 
 // Verify token route
