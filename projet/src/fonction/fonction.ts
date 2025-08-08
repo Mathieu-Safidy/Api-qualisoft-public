@@ -24,6 +24,7 @@ export class Fonction {
 		// }
 		try {
 			// const response = await axios.request(options);
+			console.log(url);
 			const response = await axios.post(url, {
 				username: username,
 				password: password,
@@ -39,8 +40,8 @@ export class Fonction {
 			}
 
 			return response.data as any
-		} catch (error) {
-			console.log('Erreur lors de la connection ', error)
+		} catch (error:any) {
+			console.log('Erreur lors de la connection ', error.message)
 			throw error
 		}
 	}

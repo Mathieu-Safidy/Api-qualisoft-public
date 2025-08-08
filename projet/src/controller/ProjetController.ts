@@ -10,4 +10,17 @@ export class ProjetController {
             res.status(401).json({message:'Une erreur s\'est produite' })
         }
     }
+    static async verif(req: Request, res: Response) {
+        const { ligne, plan, fonction } = req.params;
+        try {
+            const result = await ProjetRepository.verifier(ligne, plan, fonction);
+            if (result.length > 0) {
+                res.status(200).json(result);
+            } else {
+                res.status(404).json({ message: 'Projet non trouvé' });
+            }
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la vérification du projet', error });
+        }
+    }
 }

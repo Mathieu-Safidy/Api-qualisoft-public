@@ -8,11 +8,11 @@ export class Client {
         Object.assign(this, init);
     }
 
-    verifier() {
-        
+    async verifier() {
         try {
-            const result: any = pool!.query('select * from "detail_projet".client where nom = $1', [this.nom]);
-            if (result.rows.length > 0) {
+            const result: any = await pool!.query('select * from "detail_projet".client where LOWER(nom) = LOWER($1)', [this.nom]);
+            console.log(result)
+            if (result.rows && result.rowCount > 0) {
                 return new Client({
                     id_client: result.rows[0].id_client,
                     nom: result.rows[0].nom
@@ -22,6 +22,22 @@ export class Client {
             }
         } catch (error) {
             console.log('Une erreur est survenue lors de la vérification du client:', error);
+            throw error;
+        }
+    }
+
+    static async getClient(id_client: string) {
+        try {
+            const result: any = await pool!.query(`SELECT * FROM "detail_projet".client WHERE id_client = $1`, [id_client]);
+            if (result.rows && result.rowCount > 0) {
+                return new Client({
+                    id_client: result.rows[0].id_client,
+                    nom: result.rows[0].nom
+                });
+            } else {
+                return false;
+            }
+        } catch (error) {
             throw error;
         }
     }

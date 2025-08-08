@@ -43,18 +43,21 @@ export class ParametrageRepository {
                         // id etape qualite
                         // id type erreur 
             let id_client = null;
+            console.log(parametrage.client_nom)
             if(parametrage.client_nom) {
 
                 const client = new Client({
                     nom: parametrage.client_nom
                 })
                 
-                const verif = client.verifier();
+                const verif = await client.verifier();
                 if (!verif) {
                     id_client = (await clientConnect.query('INSERT INTO "detail_projet".client (nom) VALUES ($1) RETURNING id_client', [client.nom])).rows[0].id_client;
                 } else {
                     id_client = verif.id_client;
                 }
+
+                console.log('id_client',id_client);
             }
                 
             const projet = new Projet({
@@ -95,11 +98,13 @@ export class ParametrageRepository {
 
             for (const element of etape) {
 
-                if (biblio[element.operation_de_controle]) {
-                    biblio[element.operation_de_controle] += 1;
+                if (biblio[element.operation]) {
+                    biblio[element.operation] += 1;
                 } else {
-                    biblio[element.operation_de_controle] = 0;
+                    biblio[element.operation] = 0;
                 }
+
+                console.log('Objectif qualite ',element);
 
                 const etape_qualite = (await clientConnect.query(
                     `INSERT INTO "detail_projet".etape_qualite (
@@ -108,38 +113,52 @@ export class ParametrageRepository {
                         ordre,
                         type_de_controle,
                         id_unite_de_controle,
-                        operation_de_controle,
-                        operation_a_controle,
+                        operation_de_control,
+                        operation_a_controller,
                         id_projet
                     ) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id_etape_qualite`,
                     [
-                        element.seuil_qualite || 0,
-                        element.coef_rejet || 0,
-                        biblio[element.operation_de_controle] || 0,
-                        element.type_de_controle || null,
-                        element.id_unite_de_controle || null,
-                        element.operation_de_controle || null,
-                        element.operation_a_controle || null,
+                        element.seuilQualite || 0,
+                        element.critereRejet || 0,
+                        biblio[element.operation] || 0,
+                        element.typeControl || null,
+                        element.unite || null,
+                        element.operation || null,
+                        element.operationAControler || null,
                         id_projet
                     ]
                 )).rows[0].id_etape_qualite;
 
                 etape_qualite_list.push({
                     id_etape_qualite: etape_qualite,
-                    operation: element.operation_de_controle
+                    operation: element.operation
                 });
             }
 
             if (parametrage.type_erreur) {
                 for (const typeErreur of parametrage.type_erreur) {
-                    for (const colon of parametrage.colonne) {
+                    let id_colone = parametrage.id_colonnes;
+                    for (const [index, colon] of parametrage.colonne.entries()) {
                         const valable = typeErreur[colon];
+                        
                         if (valable) {
                             for (const etape_qualite of etape_qualite_list) {
-                                if (etape_qualite.operation.includes(colon)) {
+                                console.log(valable , typeErreur[colon] , colon , etape_qualite , id_colone[index])
+                                // throw new Error("Wait");
+                                if (etape_qualite.operation.includes(id_colone[index])) {
+                                    let erreurType = (await clientConnect.query(
+                                        'INSERT INTO "detail_projet".type_erreur (libelle,coef,est_majeur,raccourci,id_projet) values ($1,$2,$3,$4,$5) returning id_type_erreur',[
+                                            colon,
+                                            typeErreur.coef,
+                                            (typeErreur.degre != 0),
+                                            typeErreur.raccourci,
+                                            id_projet
+                                        ]
+                                    )).rows[0].id_type_erreur;
+                                    console.log('erreur ',erreurType)
                                     await clientConnect.query('INSERT INTO "detail_projet".erreur_valable (id_etape_qualite, id_type_erreur) VALUES ($1, $2)', [
                                         etape_qualite.id_etape_qualite,
-                                        etape_qualite.operation
+                                        erreurType
                                     ]);
                                 }
                             }

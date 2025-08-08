@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express'
-import { capacityMiddleware, catchAsync, withCapacity } from '../controller/tets'
+import { capacityMiddleware, catchAsync, setUserMiddleware, withCapacity } from '../controller/tets'
 import { ErreurRepository } from '../modele/erreur/ErreurRepository'
 import { ErreurController } from '../controller/ErreurController'
 import { VueActivite } from '../modele/vueActivite/VueActivite'
@@ -9,6 +9,8 @@ import { OperationController } from '../controller/OperationController'
 import { UniteController } from '../controller/UniteController'
 import { ProjetController } from '../controller/ProjetController'
 import { ParametrageController } from '../controller/ParametrageController'
+import { Client } from '../modele/client/Client'
+import { ClientController } from '../controller/ClientController'
 
 const router = Router()
 
@@ -33,6 +35,8 @@ router.get('/unites', catchAsync(UniteController.getUnites))
 
 router.get('/projets' , catchAsync(ProjetController.getAll))
 
-// router.post('/parametrage', setUserMiddleware , capacityMiddleware(7) ,  )
+router.get('/client/:id' , catchAsync(ClientController.getById))
+
+router.get('/verifier/ligne/:ligne/plan/:plan/fonction/:fonction', catchAsync(ProjetController.verif))
 
 export default router

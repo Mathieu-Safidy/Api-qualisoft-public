@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import parametrageRouter from "./router/parametrage"
 import * as dotenv from 'dotenv';
 import { initDb } from "./modele/database/db";
+import { catchAsync } from "./controller/tets";
 
 // Setup environment
 dotenv.config();

@@ -16,6 +16,8 @@ export class ParametrageController {
         let objectif_qualite = data.formArray || []; 
         let type_erreur = data.formErreur || [];
         let colonne_operation = data.colonne || [];
+        let id_colonnes = data.id_colonnes || [];
+       
 
         if (colonne_operation.length !== 0) {
             colonne_operation = colonne_operation.filter((col: any) => col && col !== null && col !== undefined);
@@ -33,8 +35,11 @@ export class ParametrageController {
             fonction: fonction,
             objectif_qualite: objectif_qualite,
             type_erreur: type_erreur,
-            colonne: colonne_operation
+            colonne: colonne_operation,
+            id_colonnes: id_colonnes
         });
+
+        console.log('Parametrage:', parametrage);
 
         const id_projet = ParametrageRepository.create(parametrage);
 
