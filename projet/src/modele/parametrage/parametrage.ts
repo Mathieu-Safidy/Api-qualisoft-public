@@ -15,6 +15,7 @@ export class Parametrage {
     type_erreur: any[] = [];
     colonne: any[] = [];
     id_colonnes: any[] = [];
+    id_projet!: string;
 
     constructor(init?: Partial<Parametrage>) {
         Object.assign(this, init);
