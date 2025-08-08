@@ -3,10 +3,11 @@ import { pool } from "../database/db";
 import { Parametrage } from "./parametrage";
 import { Projet } from "../projet/Projet";
 import { Client } from "../client/Client";
+import { ObjectifQualite } from "../objectIf/ObjectifQualite";
 
 export class ParametrageRepository {
     static async create(parametrage: Parametrage): Promise<any> {
-        const clientConnect = await pool.connect();
+        const clientConnect = await pool!.connect();
         try {
             await clientConnect.query('BEGIN');
             // de base

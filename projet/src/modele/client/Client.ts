@@ -11,7 +11,7 @@ export class Client {
     verifier() {
         
         try {
-            const result: any = pool.query('select * from "detail_projet".client where nom = LOWER($1)', [this.nom]);
+            const result: any = pool!.query('select * from "detail_projet".client where nom = $1', [this.nom]);
             if (result.rows.length > 0) {
                 return new Client({
                     id_client: result.rows[0].id_client,

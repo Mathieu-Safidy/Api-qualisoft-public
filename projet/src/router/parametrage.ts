@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express'
-import { capacityMiddleware, catchAsync, setUserMiddleware, withCapacity } from '../controller/tets'
+import { capacityMiddleware, catchAsync, withCapacity } from '../controller/tets'
 import { ErreurRepository } from '../modele/erreur/ErreurRepository'
 import { ErreurController } from '../controller/ErreurController'
 import { VueActivite } from '../modele/vueActivite/VueActivite'
@@ -12,6 +12,7 @@ import { ParametrageController } from '../controller/ParametrageController'
 
 const router = Router()
 
+router.use(setUserMiddleware)
 // router.use()
 
 // router.get('/parametrage', setUserMiddleware, capacityMiddleware(4), async (req: any, res: any) => {
