@@ -60,6 +60,8 @@ export class ParametrageController {
         let type_erreur = data.formErreur || [];
         let colonne_operation = data.colonne || [];
         let id_colonnes = data.id_colonnes || [];
+        let id_projet_in = data.id_projet || '';
+        
        
 
         if (colonne_operation.length !== 0) {
@@ -79,12 +81,13 @@ export class ParametrageController {
             objectif_qualite: objectif_qualite,
             type_erreur: type_erreur,
             colonne: colonne_operation,
-            id_colonnes: id_colonnes
+            id_colonnes: id_colonnes,
+            id_projet: id_projet_in
         });
 
         console.log('Parametrage:', parametrage);
 
-        const id_projet = ParametrageRepository.create(parametrage);
+        const id_projet = ParametrageRepository.update(parametrage);
 
         return res.status(201).json({ parametre: id_projet,message: 'Paramétrage créé' });
     }
