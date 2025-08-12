@@ -288,14 +288,43 @@ export class ParametrageRepository {
 
             // Suppression des étapes qui ne sont plus présentes
             const incomingOperations = etape.map(e => e.operation);
-            for (const etapeExist of existingEtapes) {
-                if (!incomingOperations.includes(etapeExist.operation_de_control)) {
+            // for (const etapeExist of existingEtapes) {
+            //     if (!incomingOperations.includes(etapeExist.operation_de_control)) {
+            //         await clientConnect.query(
+            //             'DELETE FROM "detail_projet".erreur_valable WHERE id_etape_qualite = $1',
+            //             [etapeExist.id_etape_qualite]
+            //         );
+            //         await clientConnect.query(
+            //             'DELETE FROM "detail_projet".etape_qualite WHERE id_etape_qualite = $1',
+            //             [etapeExist.id_etape_qualite]
+            //         );
+            //     }
+            // }
+            
+            console.log('incoming', incomingOperations, existingEtapes)
+            let exist: Record<string, string> = {};
+                for (const typeExist of existingEtapes) {
+                    if (incomingOperations.includes(typeExist.operation_de_control)) {
+                        exist[typeExist.operation_de_control] = typeExist.id_etape_qualite;
+                        continue
+                    }
+                }
+
+                console.log('exist', exist )
+                let nonexist = existingEtapes.filter(obj => !Object.keys(exist).includes(obj.operation_de_control))
+                console.log('non exist', nonexist);
+
+                for (const existance of nonexist) {
+                    await clientConnect.query(
+                        'DELETE FROM "detail_projet".erreur_valable WHERE id_etape_qualite = $1',
+                        [existance.id_etape_qualite]
+                    );
+
                     await clientConnect.query(
                         'DELETE FROM "detail_projet".etape_qualite WHERE id_etape_qualite = $1',
-                        [etapeExist.id_etape_qualite]
+                        [existance.id_etape_qualite]
                     );
                 }
-            }
 
             // Ajout/mise à jour des étapes
             for (const element of etape) {
@@ -309,6 +338,8 @@ export class ParametrageRepository {
                 let etape_qualite_id: number | null = null;
                 const exist = existingEtapes.find(e => e.operation_de_control === element.operation);
 
+                console.log('element', element)
+                // throw new Error('wait ....')
                 if (element.id_etape_qualite) {
                     await clientConnect.query(
                         `UPDATE "detail_projet".etape_qualite
@@ -324,7 +355,7 @@ export class ParametrageRepository {
                             element.seuilQualite || 0,
                             element.critereRejet || 0,
                             biblio[element.operation] || 0,
-                            element.typeControl || null,
+                            element.typeControl || 0,
                             element.unite || null,
                             element.operation || null,
                             element.operationAControler || null,
@@ -364,6 +395,7 @@ export class ParametrageRepository {
                 etape_qualite_record[element.operation].push(etape_qualite_id);
             }
 
+
             // Gestion des types d'erreur
             let erreur_type_sauve: Record<string, {
                 id_type_erreur: string,
@@ -379,20 +411,32 @@ export class ParametrageRepository {
 
                 // Suppression des types d'erreur qui ne sont plus présents
                 const incomingLibelles = parametrage.type_erreur.map(e => e.typeErreur);
+
+                console.log('incoming', incomingLibelles, existingTypesErreur)
+
+                let exist: Record<string, string> = {};
                 for (const typeExist of existingTypesErreur) {
-                    if (!incomingLibelles.includes(typeExist.libelle)) {
-
-                        await clientConnect.query(
-                            'DELETE FROM "detail_projet".erreur_valable WHERE id_type_erreur = $1',
-                            [typeExist.id_type_erreur]
-                        );
-
-                        await clientConnect.query(
-                            'DELETE FROM "detail_projet".type_erreur WHERE id_type_erreur = $1',
-                            [typeExist.id_type_erreur]
-                        );
+                    if (incomingLibelles.includes(typeExist.libelle)) {
+                        exist[typeExist.libelle] = typeExist.id_type_erreur;
+                        continue
                     }
                 }
+
+                let nonexist = existingTypesErreur.filter(obj => !Object.values(exist).includes(obj.id_type_erreur))
+                console.log('non exist', nonexist);
+
+                for (const existance of nonexist) {
+                    await clientConnect.query(
+                        'DELETE FROM "detail_projet".erreur_valable WHERE id_type_erreur = $1',
+                        [existance.id_type_erreur]
+                    );
+
+                    await clientConnect.query(
+                        'DELETE FROM "detail_projet".type_erreur WHERE id_type_erreur = $1',
+                        [existance.id_type_erreur]
+                    );
+                }
+
 
                 // Ajout/mise à jour des types d'erreur
                 for (const typeErreur of parametrage.type_erreur) {
@@ -444,22 +488,23 @@ export class ParametrageRepository {
                     for (const id_etape_qualite of etape_qualite_record[operation]) {
                         for (const erreur_type of erreur_type_sauve[operation] || []) {
                             // Vérifier si la liaison existe déjà
-                            
+
                             console.log('etape', id_etape_qualite, (erreur_type as any)?.id_type_erreur, (erreur_type as any)?.valabilite)
                             const existingErreurValable = (await clientConnect.query(
                                 'SELECT 1 FROM "detail_projet".erreur_valable WHERE id_etape_qualite = $1 AND id_type_erreur = $2',
                                 [id_etape_qualite, erreur_type.id_type_erreur]
                             )).rowCount;
-
+                            
                             if (erreur_type.valabilite) {
-                                if (existingErreurValable && !(existingErreurValable > 0)) {
+                                console.log('existing erreur valable', existingErreurValable , erreur_type , !!(existingErreurValable != null && !(existingErreurValable > 0)))
+                                if (existingErreurValable != null && !(existingErreurValable > 0)) {
                                     await clientConnect.query(
                                         'INSERT INTO "detail_projet".erreur_valable (id_etape_qualite, id_type_erreur) VALUES ($1, $2)',
                                         [id_etape_qualite, erreur_type.id_type_erreur]
                                     );
                                 }
                             } else {
-                                if (existingErreurValable && (existingErreurValable > 0)) {
+                                if (existingErreurValable != null && (existingErreurValable > 0)) {
                                     await clientConnect.query(
                                         'DELETE FROM "detail_projet".erreur_valable WHERE id_etape_qualite = $1 AND id_type_erreur = $2',
                                         [id_etape_qualite, erreur_type.id_type_erreur]
@@ -469,9 +514,9 @@ export class ParametrageRepository {
                         }
                     }
                 }
-                
-                throw new Error('wait....');
-                
+
+                // throw new Error('wait....');
+
             }
 
             await clientConnect.query('COMMIT');

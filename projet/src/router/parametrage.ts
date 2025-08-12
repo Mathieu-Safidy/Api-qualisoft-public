@@ -21,6 +21,8 @@ router.use(setUserMiddleware)
 //     return res.status(200).json({ message: 'Paramétrage reçu' })
 // })
 
+router.post('/update', catchAsync(ParametrageController.update))
+
 router.post('/parametrage', catchAsync(ParametrageController.create))
 
 router.get('/erreurs', catchAsync(ErreurController.getErreurSuggestions))
