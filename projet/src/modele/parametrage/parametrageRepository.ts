@@ -98,6 +98,25 @@ export class ParametrageRepository {
                 ]
             )).rows[0].id_projet;
 
+            const interlocuteurs = parametrage.interlocuteurs || [];
+
+            if (id_projet) {
+                for (const interlocuteur of interlocuteurs) {
+                    await clientConnect.query(
+                        `INSERT INTO "detail_projet".interlocuteur (
+                            nom_interlocuteur,
+                            contact_interlocuteur,
+                            id_projet
+                        ) VALUES ($1, $2, $3) `,
+                        [
+                            interlocuteur.nom_interlocuteur || null,
+                            interlocuteur.contact_interlocuteur || null,
+                            id_projet
+                        ]
+                    );
+                }
+            }
+
             const etape = parametrage.objectif_qualite || [];
 
             let biblio: Record<string, number> = {};
@@ -275,6 +294,93 @@ export class ParametrageRepository {
                 ]
             );
 
+            if (parametrage.id_projet) {
+                const interlocuteur_exist = await clientConnect.query(
+                    `SELECT * FROM "detail_projet".interlocuteur WHERE id_projet = $1`,
+                    [parametrage.id_projet]
+                );
+
+                const interlocuteur_nom = interlocuteur_exist.rows?.filter(detail => detail.nom_interlocuteur).map(detail => detail.nom_interlocuteur)
+                const interlocuteur_contact = interlocuteur_exist.rows?.filter(detail => detail.contact_interlocuteur).map(detail => detail.contact_interlocuteur)
+
+                const interlocuteur_nom_new = parametrage.interlocuteurs?.filter(detail => detail.nom_interlocuteur).map(detail => detail.nom_interlocuteur)
+                const interlocuteur_contact_new = parametrage.interlocuteurs?.filter(detail => detail.contact_interlocuteur).map(detail => detail.contact_interlocuteur)
+
+                let interlocuteur_map: Record<string, any> = {};
+                let notExist_inter: any = [];
+
+                let aInserer = parametrage.interlocuteurs.filter(detail => !interlocuteur_nom.includes(detail.nom_interlocuteur) && !interlocuteur_contact.includes(detail.contact_interlocuteur)).map(obj => [obj.nom_interlocuteur, obj.contact_interlocuteur])
+                let aSuprimer = interlocuteur_exist.rows.filter(detail => !interlocuteur_nom_new.includes(detail.nom_interlocuteur) && !interlocuteur_contact_new.includes(detail.contact_interlocuteur)).map(obj => obj.id_interlocuteur)
+
+                // for (let i = 0; i < interlocuteur_exist.rows.length; i++) {
+                //     if (!interlocuteur_nom.includes(parametrage.interlocuteurs[i].nom_interlocuteur) && !interlocuteur_contact.includes(parametrage.interlocuteurs[i].contact_interlocuteur)) {
+                //         deleted.push(parametrage.interlocuteurs[i].id_interlocuteur)
+                //     }
+                // }
+
+                for (const exist_plus of aSuprimer || []) {
+                    await clientConnect.query(`
+                        DELETE FROM "detail_projet".interlocuteur where id_interlocuteur = $1
+                        `, [exist_plus]);
+                }
+
+                // for (let i = 0; i < interlocuteur_exist.rows.length; i++) {
+                //     let inter_name = interlocuteur_exist.rows[i].nom_interlocuteur;
+                //     let inter_contact = interlocuteur_exist.rows[i].contact_interlocuteur;
+                //     let inter_id = interlocuteur_exist.rows[i].id_interlocuteur;
+                //     for (let index = 0; index < parametrage.interlocuteurs.length; index++) {
+
+                //         if (inter_name === parametrage.interlocuteurs[index].nom_interlocuteur || inter_contact === parametrage.interlocuteurs[index].contact_interlocuteur) {
+                //             if (!interlocuteur_map[inter_id]) {
+                //                 interlocuteur_map[inter_id] = []
+                //             }
+                //             interlocuteur_map[inter_id] = [parametrage.interlocuteurs[index].nom_interlocuteur, parametrage.interlocuteurs[index].contact_interlocuteur];
+                //             break;
+                //         }
+                //     }
+                // }
+
+                interlocuteur_exist.rows.forEach(exist => {
+                    const match = parametrage.interlocuteurs.find(inter =>
+                        exist.nom_interlocuteur === inter.nom_interlocuteur ||
+                        exist.contact_interlocuteur === inter.contact_interlocuteur
+                    );
+                    if (match) {
+                        interlocuteur_map[exist.id_interlocuteur] = [match.nom_interlocuteur, match.contact_interlocuteur];
+                    }
+                });
+
+                for (const [id_interlocuteur, [nom_interlocuteur, contact_interlocuteur]] of Object.entries(interlocuteur_map) || []) {
+                    await clientConnect.query(
+                        `UPDATE "detail_projet".interlocuteur
+                        SET nom_interlocuteur = $1,
+                            contact_interlocuteur = $2
+                        WHERE id_interlocuteur = $3`,
+                        [
+                            nom_interlocuteur || null,
+                            contact_interlocuteur || null,
+                            id_interlocuteur
+                        ]
+                    );
+                }
+                for (const [nom_interlocuteur, contact_interlocuteur] of Object.entries(aInserer) || []) {
+                    if (nom_interlocuteur && contact_interlocuteur) {
+                        await clientConnect.query(
+                            `INSERT INTO "detail_projet".interlocuteur (
+                            nom_interlocuteur,
+                            contact_interlocuteur,
+                            id_projet
+                        ) VALUES ($1, $2, $3) `,
+                            [
+                                nom_interlocuteur || null,
+                                contact_interlocuteur || null,
+                                parametrage.id_projet
+                            ]
+                        );
+                    }
+                }
+            }
+
             // Gestion des étapes qualité
             const etape = parametrage.objectif_qualite || [];
             let biblio: Record<string, number> = {};
@@ -300,31 +406,31 @@ export class ParametrageRepository {
             //         );
             //     }
             // }
-            
+
             console.log('incoming', incomingOperations, existingEtapes)
             let exist: Record<string, string> = {};
-                for (const typeExist of existingEtapes) {
-                    if (incomingOperations.includes(typeExist.operation_de_control)) {
-                        exist[typeExist.operation_de_control] = typeExist.id_etape_qualite;
-                        continue
-                    }
+            for (const typeExist of existingEtapes) {
+                if (incomingOperations.includes(typeExist.operation_de_control)) {
+                    exist[typeExist.operation_de_control] = typeExist.id_etape_qualite;
+                    continue
                 }
+            }
 
-                console.log('exist', exist )
-                let nonexist = existingEtapes.filter(obj => !Object.keys(exist).includes(obj.operation_de_control))
-                console.log('non exist', nonexist);
+            console.log('exist', exist)
+            let nonexist = existingEtapes.filter(obj => !Object.keys(exist).includes(obj.operation_de_control))
+            console.log('non exist', nonexist);
 
-                for (const existance of nonexist) {
-                    await clientConnect.query(
-                        'DELETE FROM "detail_projet".erreur_valable WHERE id_etape_qualite = $1',
-                        [existance.id_etape_qualite]
-                    );
+            for (const existance of nonexist) {
+                await clientConnect.query(
+                    'DELETE FROM "detail_projet".erreur_valable WHERE id_etape_qualite = $1',
+                    [existance.id_etape_qualite]
+                );
 
-                    await clientConnect.query(
-                        'DELETE FROM "detail_projet".etape_qualite WHERE id_etape_qualite = $1',
-                        [existance.id_etape_qualite]
-                    );
-                }
+                await clientConnect.query(
+                    'DELETE FROM "detail_projet".etape_qualite WHERE id_etape_qualite = $1',
+                    [existance.id_etape_qualite]
+                );
+            }
 
             // Ajout/mise à jour des étapes
             for (const element of etape) {
@@ -494,9 +600,9 @@ export class ParametrageRepository {
                                 'SELECT 1 FROM "detail_projet".erreur_valable WHERE id_etape_qualite = $1 AND id_type_erreur = $2',
                                 [id_etape_qualite, erreur_type.id_type_erreur]
                             )).rowCount;
-                            
+
                             if (erreur_type.valabilite) {
-                                console.log('existing erreur valable', existingErreurValable , erreur_type , !!(existingErreurValable != null && !(existingErreurValable > 0)))
+                                console.log('existing erreur valable', existingErreurValable, erreur_type, !!(existingErreurValable != null && !(existingErreurValable > 0)))
                                 if (existingErreurValable != null && !(existingErreurValable > 0)) {
                                     await clientConnect.query(
                                         'INSERT INTO "detail_projet".erreur_valable (id_etape_qualite, id_type_erreur) VALUES ($1, $2)',

@@ -4,7 +4,7 @@ import { ParametrageRepository } from "../modele/parametrage/parametrageReposito
 export class ParametrageController {
     static async create(req: any, res: any) {
         const data = req.body;
-        let clientName = data.client_nom || null; //
+        let clientName = data.clientDetail.client.nom_client || null; //
         let interlocuteur_nom = data.interlocuteur_nom || ''; //
         let contact_interlocuteur = data.contact_interlocuteur || ''; //
         let cp_responsable = data.cp_responsable || ''; //
@@ -17,6 +17,8 @@ export class ParametrageController {
         let type_erreur = data.formErreur || [];
         let colonne_operation = data.colonne || [];
         let id_colonnes = data.id_colonnes || [];
+
+        let interlocuteurs = data.clientDetail.interlocuteur || [];
        
 
         if (colonne_operation.length !== 0) {
@@ -36,12 +38,13 @@ export class ParametrageController {
             objectif_qualite: objectif_qualite,
             type_erreur: type_erreur,
             colonne: colonne_operation,
-            id_colonnes: id_colonnes
+            id_colonnes: id_colonnes,
+            interlocuteurs: interlocuteurs
         });
 
         console.log('Parametrage:', parametrage);
 
-        const id_projet = ParametrageRepository.create(parametrage);
+        const id_projet = await ParametrageRepository.create(parametrage);
 
         return res.status(201).json({ parametre: id_projet,message: 'Paramétrage créé' });
     }
@@ -87,7 +90,9 @@ export class ParametrageController {
 
         console.log('Parametrage:', parametrage);
 
-        const id_projet = ParametrageRepository.update(parametrage);
+        
+
+        const id_projet = await ParametrageRepository.update(parametrage);
 
         return res.status(201).json({ parametre: id_projet,message: 'Paramétrage créé' });
     }

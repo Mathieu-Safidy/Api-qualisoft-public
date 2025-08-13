@@ -19,11 +19,13 @@ export class ProjetRepository {
             const result = await pool!.query(`select * from "detail_projet".projet where (id_ligne) = ($1) and (id_plan) = ($2) and (id_fonction) = ($3)`, [ligne, plan, fonction]);
             const etape_qualite = await this.verifEtapeQualite(result.rows[0]?.id_projet);
             const type_erreur = await this.verifierTypeErreur(result.rows[0]?.id_projet);
+            const interlocuteurs = await this.verifierInterlocuteur(result.rows[0]?.id_projet);
             // console.log('id projet', result.rows[0]?.id_projet , etape_qualite , type_erreur)
             return {
                 projet: result.rows[0],
                 etape: etape_qualite,
-                erreur: type_erreur
+                erreur: type_erreur,
+                interlocuteurs: interlocuteurs
             };
         } catch (error) {
             console.error('Une erreur est survenue lors de la vérification du projet:', error);
@@ -64,6 +66,15 @@ export class ProjetRepository {
                     AND eq.id_projet = $1
                     ORDER BY te.id_type_erreur, eq.operation_de_control;`
                 , [id_projet]);
+            return result.rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async verifierInterlocuteur(id_projet: string) {
+        try {
+            const result = await pool!.query(`SELECT * FROM "detail_projet".interlocuteur WHERE id_projet = $1`, [id_projet]);
             return result.rows;
         } catch (error) {
             throw error;
