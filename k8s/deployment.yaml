@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{APP_NAME}}
+  namespace: {{NAMESPACE}}
+  labels:
+    app: {{APP_NAME}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{APP_NAME}}
+  template:
+    metadata:
+      labels:
+        app: {{APP_NAME}}
+    spec:
+      containers:
+        - name: {{APP_NAME}}
+          image: {{REGISTRY_HOST}}/{{APP_NAME}}:latest
+          ports:
+            - containerPort: {{CONTAINER_PORT}}
+              # hostPort: 80 # To allow deployment to be accessed via port 80 explicitly for testing
+              # protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: MICROSERVICE_NAME
+              value: Qualisoft Microservice
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: qualisoft-secret
+                  key: DATABASE_URL
+            - name: ROOT_PATH
+              value: /{{APP_ROUTE}}
+          volumeMounts:
+            - name: jwt-keys-volume
+              mountPath: "/etc/secrets/jwt/private.key" # Mount the file directly
+              subPath: "private.key" # Refers to the key name within the secret
+              readOnly: true
+            - name: jwt-keys-volume
+              mountPath: "/etc/secrets/jwt/public.key" # Mount the file directly
+              subPath: "public.key" # Refers to the key name within the secret
+              readOnly: true
+            
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: {{APP_SECRET_NAME}}
+          #         key: api-key
+      # nodeSelector:
+      #   frontend-host: true
+      volumes:
+        - name: jwt-keys-volume
+          secret:
+            secretName: jwt-keys
+      imagePullSecrets:
+        - name: regcred # Use this secret to pull the image from the local registry
