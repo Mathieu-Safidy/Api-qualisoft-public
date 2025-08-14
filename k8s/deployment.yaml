@@ -34,25 +34,17 @@ spec:
                   key: DATABASE_URL
             - name: ROOT_PATH
               value: /{{APP_ROUTE}}
-          volumeMounts:
-            - name: jwt-keys-volume
-              mountPath: "/etc/secrets/jwt/private.key" # Mount the file directly
-              subPath: "private.key" # Refers to the key name within the secret
-              readOnly: true
-            - name: jwt-keys-volume
-              mountPath: "/etc/secrets/jwt/public.key" # Mount the file directly
-              subPath: "public.key" # Refers to the key name within the secret
-              readOnly: true
-            
+            - name: AUTH_API
+              value: http://192.168.12.170/luminess-ad-authentication-microservice
+            - name: GPAO_API
+              value: http://192.168.12.170/gpao-microservice
+            - name: RBAC_API
+              value: http://192.168.12.170/luminess-rbac-microservice
           #     valueFrom:
           #       secretKeyRef:
           #         name: {{APP_SECRET_NAME}}
           #         key: api-key
       # nodeSelector:
       #   frontend-host: true
-      volumes:
-        - name: jwt-keys-volume
-          secret:
-            secretName: jwt-keys
       imagePullSecrets:
         - name: regcred # Use this secret to pull the image from the local registry
