@@ -1,3 +1,4 @@
+import axios from "axios";
 import { pool } from "../database/db";
 
 export class Client {
@@ -28,11 +29,12 @@ export class Client {
 
     static async getClient(id_client: string) {
         try {
-            const result: any = await pool!.query(`SELECT * FROM "detail_projet".client WHERE id_client = $1`, [id_client]);
-            if (result.rows && result.rowCount > 0) {
+            // const result: any = await pool!.query(`SELECT * FROM "detail_projet".client WHERE id_client = $1`, [id_client]);
+            const result: any = await axios.get(`${process.env.GPAO_API}/projets/MADAGASCAR/${id_client}`);
+            if (result.status === 200) {
                 return new Client({
-                    id_client: result.rows[0].id_client,
-                    nom: result.rows[0].nom
+                    id_client: result.data.id_plan,
+                    nom: result.data.libelle
                 });
             } else {
                 return false;

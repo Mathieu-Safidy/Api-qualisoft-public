@@ -14,7 +14,7 @@ export class ProjetController {
         const { ligne, plan, fonction } = req.params;
         try {
             const result = await ProjetRepository.verifier(ligne, plan, fonction);
-            // console.log(result)
+            console.log(result)
             if (result.projet) {
                 res.status(200).json(result);
             } else {

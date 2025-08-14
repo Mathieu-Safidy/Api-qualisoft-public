@@ -7,8 +7,8 @@ export class Projet {
     id_plan!: string | null;
     id_fonction!: string | null;
     id_cp!: string | null;
-    id_type_traitement!: string;
-    id_client!: number | null;
+    id_type_traitement!: number;
+    id_client!: string | null;
 
     constructor(init? : Partial<Projet>) {
         Object.assign(this, init);

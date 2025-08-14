@@ -7,7 +7,7 @@ export class Parametrage {
     contact_interlocuteur!: string ;
     cp_responsable!: string ;
     description_traite!: string ;
-    type_traite!: string ;
+    type_traite!: number ;
     ligne?: string;
     plan?: string;
     fonction?: string;

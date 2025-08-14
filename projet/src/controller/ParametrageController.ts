@@ -4,7 +4,8 @@ import { ParametrageRepository } from "../modele/parametrage/parametrageReposito
 export class ParametrageController {
     static async create(req: any, res: any) {
         const data = req.body;
-        let clientName = data.clientDetail.client.nom_client || null; //
+        // let clientName = data.clientDetail.client.nom_client || null; //
+        let clientName = ''; //
         let interlocuteur_nom = data.interlocuteur_nom || ''; //
         let contact_interlocuteur = data.contact_interlocuteur || ''; //
         let cp_responsable = data.cp_responsable || ''; //
@@ -50,7 +51,8 @@ export class ParametrageController {
     }
     static async update(req: any, res: any) {
         const data = req.body;
-        let clientName = data.client_nom || null; //
+        // let clientName = data.client_nom || null; //
+        let clientName = ''; //
         let interlocuteur_nom = data.interlocuteur_nom || ''; //
         let contact_interlocuteur = data.contact_interlocuteur || ''; //
         let cp_responsable = data.cp_responsable || ''; //
@@ -63,8 +65,8 @@ export class ParametrageController {
         let type_erreur = data.formErreur || [];
         let colonne_operation = data.colonne || [];
         let id_colonnes = data.id_colonnes || [];
-        let id_projet_in = data.id_projet || '';
-        
+        let id_projet_in = data.id_projet || ''; 
+        let interlocuteurs = data.clientDetail.interlocuteur || [];
        
 
         if (colonne_operation.length !== 0) {
@@ -85,7 +87,8 @@ export class ParametrageController {
             type_erreur: type_erreur,
             colonne: colonne_operation,
             id_colonnes: id_colonnes,
-            id_projet: id_projet_in
+            id_projet: id_projet_in,
+            interlocuteurs: interlocuteurs
         });
 
         console.log('Parametrage:', parametrage);

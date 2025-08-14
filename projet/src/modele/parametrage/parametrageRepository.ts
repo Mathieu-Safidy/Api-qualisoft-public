@@ -42,23 +42,23 @@ export class ParametrageRepository {
             // erreur_valable
             // id etape qualite
             // id type erreur 
-            let id_client = null;
-            console.log(parametrage.client_nom)
-            if (parametrage.client_nom) {
+            // let id_client = null;
+            // console.log(parametrage.client_nom)
+            // if (parametrage.client_nom) {
 
-                const client = new Client({
-                    nom: parametrage.client_nom
-                })
+            //     const client = new Client({
+            //         nom: parametrage.client_nom
+            //     })
 
-                const verif = await client.verifier();
-                if (!verif) {
-                    id_client = (await clientConnect.query('INSERT INTO "detail_projet".client (nom) VALUES ($1) RETURNING id_client', [client.nom])).rows[0].id_client;
-                } else {
-                    id_client = verif.id_client;
-                }
+            //     const verif = await client.verifier();
+            //     if (!verif) {
+            //         id_client = (await clientConnect.query('INSERT INTO "detail_projet".client (nom) VALUES ($1) RETURNING id_client', [client.nom])).rows[0].id_client;
+            //     } else {
+            //         id_client = verif.id_client;
+            //     }
 
-                console.log('id_client', id_client);
-            }
+            //     console.log('id_client', id_client);
+            // }
 
             const projet = new Projet({
                 nom_interlocuteur: parametrage.interlocuteur_nom || '',
@@ -68,8 +68,8 @@ export class ParametrageRepository {
                 id_plan: parametrage.plan || '',
                 id_fonction: parametrage.fonction || '',
                 id_cp: parametrage.cp_responsable || '',
-                id_type_traitement: parametrage.type_traite || '',
-                id_client: id_client || null
+                id_type_traitement: parametrage.type_traite || 0,
+                id_client: parametrage.plan || null
             });
 
             const id_projet = (await clientConnect.query(
@@ -203,7 +203,7 @@ export class ParametrageRepository {
                 console.log('sortie')
                 for (const operation in etape_qualite_record) {
                     for (const id_etape_qualite of etape_qualite_record[operation]) {
-                        for (const erreur_type of erreur_type_sauve[operation]) {
+                        for (const erreur_type of erreur_type_sauve[operation] || []) {
                             console.log('etape', id_etape_qualite, (erreur_type as any)?.id_type_erreur, (erreur_type as any)?.valabilite)
                             if ((erreur_type as any)?.valabilite) {
                                 await clientConnect.query('INSERT INTO "detail_projet".erreur_valable (id_etape_qualite, id_type_erreur) VALUES ($1, $2)', [
@@ -253,19 +253,19 @@ export class ParametrageRepository {
             await clientConnect.query('BEGIN');
 
             // Gestion du client
-            let id_client = null;
-            if (parametrage.client_nom) {
-                const client = new Client({ nom: parametrage.client_nom });
-                const verif = await client.verifier();
-                if (!verif) {
-                    id_client = (await clientConnect.query(
-                        'INSERT INTO "detail_projet".client (nom) VALUES ($1) RETURNING id_client',
-                        [client.nom]
-                    )).rows[0].id_client;
-                } else {
-                    id_client = verif.id_client;
-                }
-            }
+            // let id_client = null;
+            // if (parametrage.client_nom) {
+            //     const client = new Client({ nom: parametrage.client_nom });
+            //     const verif = await client.verifier();
+            //     if (!verif) {
+            //         id_client = (await clientConnect.query(
+            //             'INSERT INTO "detail_projet".client (nom) VALUES ($1) RETURNING id_client',
+            //             [client.nom]
+            //         )).rows[0].id_client;
+            //     } else {
+            //         id_client = verif.id_client;
+            //     }
+            // }
 
             // Update du projet
             await clientConnect.query(
@@ -286,9 +286,9 @@ export class ParametrageRepository {
                     parametrage.description_traite || '',
                     parametrage.plan || '',
                     parametrage.cp_responsable || '',
-                    parametrage.type_traite || '',
+                    parametrage.type_traite,
                     parametrage.fonction || '',
-                    id_client || null,
+                    parametrage.plan || null,
                     parametrage.ligne || '',
                     parametrage.id_projet
                 ]
@@ -302,7 +302,7 @@ export class ParametrageRepository {
 
                 const interlocuteur_nom = interlocuteur_exist.rows?.filter(detail => detail.nom_interlocuteur).map(detail => detail.nom_interlocuteur)
                 const interlocuteur_contact = interlocuteur_exist.rows?.filter(detail => detail.contact_interlocuteur).map(detail => detail.contact_interlocuteur)
-
+                const inter = parametrage.interlocuteurs;
                 const interlocuteur_nom_new = parametrage.interlocuteurs?.filter(detail => detail.nom_interlocuteur).map(detail => detail.nom_interlocuteur)
                 const interlocuteur_contact_new = parametrage.interlocuteurs?.filter(detail => detail.contact_interlocuteur).map(detail => detail.contact_interlocuteur)
 
@@ -363,7 +363,8 @@ export class ParametrageRepository {
                         ]
                     );
                 }
-                for (const [nom_interlocuteur, contact_interlocuteur] of Object.entries(aInserer) || []) {
+                for (const [index, inserer] of Object.entries(aInserer) || []) {
+                    const [nom_interlocuteur, contact_interlocuteur] = inserer;
                     if (nom_interlocuteur && contact_interlocuteur) {
                         await clientConnect.query(
                             `INSERT INTO "detail_projet".interlocuteur (
@@ -421,17 +422,17 @@ export class ParametrageRepository {
             console.log('non exist', nonexist);
 
             for (const existance of nonexist) {
+                console.log('exist comming')
                 await clientConnect.query(
                     'DELETE FROM "detail_projet".erreur_valable WHERE id_etape_qualite = $1',
-                    [existance.id_etape_qualite]
+                    [existance.id_etape_qualite || 0]
                 );
 
                 await clientConnect.query(
                     'DELETE FROM "detail_projet".etape_qualite WHERE id_etape_qualite = $1',
-                    [existance.id_etape_qualite]
+                    [existance.id_etape_qualite || 0]
                 );
             }
-
             // Ajout/mise à jour des étapes
             for (const element of etape) {
                 if (biblio[element.operation]) {
@@ -554,7 +555,7 @@ export class ParametrageRepository {
                         await clientConnect.query(
                             'UPDATE "detail_projet".type_erreur SET coef = $1, est_majeur = $2, raccourci = $3 WHERE id_type_erreur = $4',
                             [
-                                typeErreur.coef,
+                                typeErreur.coef || 0,
                                 (typeErreur.degre != 0),
                                 typeErreur.raccourci,
                                 existing.id_type_erreur
@@ -566,7 +567,7 @@ export class ParametrageRepository {
                             'INSERT INTO "detail_projet".type_erreur (libelle,coef,est_majeur,raccourci,id_projet) values ($1,$2,$3,$4,$5) returning id_type_erreur',
                             [
                                 typeErreur.typeErreur,
-                                typeErreur.coef,
+                                typeErreur.coef || 0,
                                 (typeErreur.degre != 0),
                                 typeErreur.raccourci,
                                 parametrage.id_projet

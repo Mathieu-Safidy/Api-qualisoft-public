@@ -56,7 +56,7 @@ export function RequireCapacity(capacity: number | number[]) {
 
 export const catchAsync = (fn: any) => (req: any, res: any, next: any) => {
     Promise.resolve(fn(req, res, next)).catch(async (err) => {
-        console.log(err.message)
+        console.log(err)
         return res.status(400).json({ message: err.message })
     });
 };
