@@ -17,6 +17,7 @@ COPY package*.json ./
 # The --omit=dev flag ensures only necessary dependencies for running the app are installed,
 # leading to a smaller final image.
 RUN npm install
+COPY . .
 RUN npm run build
 
 # Stage 2: Production Stage (run the application)
@@ -30,6 +31,8 @@ WORKDIR /app
 # Copy only the installed node_modules from the builder stage
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY swagger.yaml ./swagger.yaml
+COPY swagger.yaml ./dist/swagger.yaml
 
 # Copy the rest of the application code
 # Ensure .dockerignore is correctly configured to exclude unnecessary files (like node_modules in host)
