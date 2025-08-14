@@ -16,7 +16,7 @@ COPY package*.json ./
 # Install production dependencies
 # The --omit=dev flag ensures only necessary dependencies for running the app are installed,
 # leading to a smaller final image.
-RUN npm install --omit=dev
+RUN npm install
 RUN npm run build
 
 # Stage 2: Production Stage (run the application)
