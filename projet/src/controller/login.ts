@@ -4,44 +4,77 @@ import { User } from '../modele/user/user'
 
 export class Login {
 	static async log(req: Request, res: Response) {
-		const { username, password, mode = 'gpao' } = req.body
-		switch (mode) {
-			case 'ldap':
-				break
-			case 'gpao':
-				try {
-					const data: { user: User; token: string } =
-						await Fonction.loginGpao(username, password)
+		const { username, password } = req.body
+		const mode = username.length == 5 ? 'gpao' : 'ldap'
+		// switch (mode) {
+		// 	case 'ldap':
+		// 		try {
+		// 			const data: { user: User; token: string } =
+		// 				await Fonction.login(username, password, mode)
 
-					res.cookie('token', data.token, {
-						httpOnly: true,
-						secure: false, // Disable HTTPS
-						sameSite: 'strict',
-						maxAge: 1000 * 60 * 60,
-					})
+		// 			res.cookie('token', data.token, {
+		// 				httpOnly: true,
+		// 				secure: false, // Disable HTTPS
+		// 				sameSite: 'strict',
+		// 				maxAge: 1000 * 60 * 60,
+		// 			})
 
-					res.status(200).json({
-						message: 'Connexion réussie',
-						user: new User(
-							data.user.matricule,
-							data.user.fullname,
-							data.user.id_ligne,
-							data.user.ligne,
-							data.user.email
-						),
-					})
-				} catch (error) {
-					res.status(401).json({
-						message: 'Erreur lors de la connection ',
-						erreur: error,
-					})
-				}
+		// 			res.status(200).json({
+		// 				message: 'Connexion réussie',
+		// 				user: new User(
+		// 					data.user.matricule,
+		// 					data.user.fullname,
+		// 					data.user.id_ligne,
+		// 					data.user.ligne,
+		// 					data.user.email
+		// 				),
+		// 			})
+		// 		} catch (error) {
+		// 			res.status(401).json({
+		// 				message: 'Erreur lors de la connection ',
+		// 				erreur: error,
+		// 			})
+		// 		}
+		// 		break
+		// 	case 'gpao':
+		try {
+			const data: { user: User; token: string } = await Fonction.login(
+				username,
+				password,
+				mode
+			)
 
-				break
-			default:
-				res.status(404).json({ message: 'Acces non autorisé !' })
-				break
+			await Fonction.getCapacite(data.token)
+
+			res.cookie('token', data.token, {
+				httpOnly: true,
+				secure: false, // Disable HTTPS
+				sameSite: 'strict',
+				maxAge: 1000 * 60 * 60,
+			})
+
+			res.status(200).json({
+				message: 'Connexion réussie',
+				user: new User(
+					data.user.matricule,
+					data.user.fullname,
+					data.user.id_ligne,
+					data.user.ligne,
+					data.user.email
+				),
+			})
+		} catch (error) {
+			res.status(401).json({
+				message: 'Erreur lors de la connection ',
+				erreur: error,
+			})
 		}
+
+		// 		break
+		// 	default:
+		// 		res.status(404).json({ message: 'Acces non autorisé !' })
+		// 		break
+		// }
 	}
 
 	static async logout(req: Request, res: Response) {
@@ -55,9 +88,9 @@ export class Login {
 
 	static async verifyToken(req: Request, res: Response) {
 		const token = req.cookies?.token || null
-		const fonction = new Fonction()
+		// const fonction = new Fonction()
 		if (token) {
-			const decoded = await fonction.verifyToken(token)
+			const decoded = await Fonction.verifyToken(token)
 			res.status(200).json({ user: decoded })
 		} else {
 			res.status(401).json({ message: 'Token manquant ou invalide' })
@@ -67,10 +100,10 @@ export class Login {
 	static async verifyRole(req: Request, res: Response) {
 		const token = req.cookies?.token || null
 		const page = req.params.page || ''
-		const fonction = new Fonction()
+		// const fonction = new Fonction()
 		if (token) {
 			try {
-				const decoded: any = await fonction.verifyToken(token)
+				const decoded: any = await Fonction.verifyToken(token)
 				// res.status(200).json({ message: 'Role vérifié avec succès' });
 				if (
 					typeof decoded === 'object' &&
@@ -88,7 +121,7 @@ export class Login {
 						decoded.ligne,
 						decoded.email
 					)
-					fonction.verifyRole(user, page)
+					Fonction.verifyRole(user, page)
 					res.status(200).json({
 						message: 'Role vérifié avec succès',
 					})
