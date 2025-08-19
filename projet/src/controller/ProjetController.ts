@@ -24,4 +24,19 @@ export class ProjetController {
             res.status(500).json({ message: 'Erreur lors de la vérification du projet', error });
         }
     }
+ 
+    static async verifClone(req: Request, res: Response) {
+        const { plan, fonction } = req.params;
+        try {
+            const result = await ProjetRepository.verifierClone(plan, fonction);
+            console.log(result)
+            if (result.projet) {
+                res.status(200).json(result);
+            } else {
+                res.status(404).json({ message: 'Projet non trouvé' });
+            }
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la vérification du projet', error });
+        }
+    }
 }

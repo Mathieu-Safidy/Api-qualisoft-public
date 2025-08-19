@@ -32,6 +32,24 @@ export class ProjetRepository {
             throw error;
         }
     }
+    static async verifierClone(plan: string, fonction: string) {
+        try {
+            const result = await pool!.query(`select * from "detail_projet".projet where (id_plan) = ($1) and (id_fonction) = ($2)`, [plan, fonction]);
+            const etape_qualite = await this.verifEtapeQualite(result.rows[0]?.id_projet);
+            const type_erreur = await this.verifierTypeErreur(result.rows[0]?.id_projet);
+            const interlocuteurs = await this.verifierInterlocuteur(result.rows[0]?.id_projet);
+            // console.log('id projet', result.rows[0]?.id_projet , etape_qualite , type_erreur)
+            return {
+                projet: result.rows[0],
+                etape: etape_qualite,
+                erreur: type_erreur,
+                interlocuteurs: interlocuteurs
+            };
+        } catch (error) {
+            console.error('Une erreur est survenue lors de la vérification du projet:', error);
+            throw error;
+        }
+    }
 
     static async verifEtapeQualite(id_projet: string) {
         try {

@@ -39,6 +39,9 @@ router.get('/projets' , catchAsync(ProjetController.getAll))
 
 router.get('/client/:id' , catchAsync(ClientController.getById))
 
+router.get('/verifier/plan/:plan/fonction/:fonction', catchAsync(ProjetController.verifClone))
+
 router.get('/verifier/ligne/:ligne/plan/:plan/fonction/:fonction', catchAsync(ProjetController.verif))
+
 
 export default router
