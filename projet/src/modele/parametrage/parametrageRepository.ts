@@ -444,10 +444,9 @@ export class ParametrageRepository {
                 // Vérifier si l'étape existe déjà
                 let etape_qualite_id: number | null = null;
                 const exist = existingEtapes.find(e => e.operation_de_control === element.operation);
-
-                console.log('element', element)
+                console.log('exist me ',exist, 'existing etapes ',existingEtapes , 'element', element);
                 // throw new Error('wait ....')
-                if (element.id_etape_qualite) {
+                if (exist?.id_etape_qualite || element?.id_etape_qualite) {
                     await clientConnect.query(
                         `UPDATE "detail_projet".etape_qualite
                             SET seuil_qualite = $1,
@@ -466,11 +465,11 @@ export class ParametrageRepository {
                             element.unite || null,
                             element.operation || null,
                             element.operationAControler || null,
-                            element.id_etape_qualite
+                            element?.id_etape_qualite || exist?.id_etape_qualite
                         ]
                     );
                     etape_qualite_id = element.id_etape_qualite;
-                } else {
+                } else if (!exist && element.operation) {
                     // Insert
                     etape_qualite_id = (await clientConnect.query(
                         `INSERT INTO "detail_projet".etape_qualite (
@@ -550,7 +549,7 @@ export class ParametrageRepository {
                     let id_colone = parametrage.id_colonnes;
                     // Vérifier si le type d'erreur existe déjà
                     let existing = existingTypesErreur.find(e => e.libelle === typeErreur.typeErreur);
-                    let erreurType: string;
+                    let erreurType: string = "";
                     if (existing) {
                         await clientConnect.query(
                             'UPDATE "detail_projet".type_erreur SET coef = $1, est_majeur = $2, raccourci = $3 WHERE id_type_erreur = $4',
@@ -562,7 +561,7 @@ export class ParametrageRepository {
                             ]
                         );
                         erreurType = existing.id_type_erreur;
-                    } else {
+                    } else if (typeErreur.typeErreur) {
                         erreurType = (await clientConnect.query(
                             'INSERT INTO "detail_projet".type_erreur (libelle,coef,est_majeur,raccourci,id_projet) values ($1,$2,$3,$4,$5) returning id_type_erreur',
                             [
@@ -579,10 +578,12 @@ export class ParametrageRepository {
                         if (!erreur_type_sauve[id_colone[index]]) {
                             erreur_type_sauve[id_colone[index]] = [];
                         }
-                        erreur_type_sauve[id_colone[index]].push({
-                            id_type_erreur: erreurType,
-                            valabilite: valable
-                        });
+                        if (erreurType) {
+                            erreur_type_sauve[id_colone[index]].push({
+                                id_type_erreur: erreurType,
+                                valabilite: valable
+                            });
+                        }
                     }
                 }
 
