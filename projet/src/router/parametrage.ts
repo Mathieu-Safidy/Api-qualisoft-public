@@ -11,6 +11,7 @@ import { ProjetController } from '../controller/ProjetController'
 import { ParametrageController } from '../controller/ParametrageController'
 import { Client } from '../modele/client/Client'
 import { ClientController } from '../controller/ClientController'
+import { UserController } from '../controller/UserController'
 
 const router = Router()
 
@@ -22,6 +23,8 @@ router.use(setUserMiddleware)
 // })
 
 router.post('/update', catchAsync(ParametrageController.update))
+
+router.get('/users', catchAsync(UserController.getAllUsers))
 
 router.post('/parametrage', catchAsync(ParametrageController.create))
 

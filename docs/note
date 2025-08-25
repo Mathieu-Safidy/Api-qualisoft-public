@@ -1,0 +1,7 @@
+curl -X POST http://192.168.12.170/qualisoft-microservice/api/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"33381\", \"password\":\"mis123\"}"
+
+curl -X POST http://localhost:8080/api/test ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"mathieu\", \"password\":\"12345\"}"
