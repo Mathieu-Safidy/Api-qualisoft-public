@@ -39,4 +39,14 @@ export class ProjetController {
             res.status(500).json({ message: 'Erreur lors de la vérification du projet', error });
         }
     }
+
+    static async duplicateErrorType(req: Request, res: Response) {
+        try {
+            const { source, target } = req.body;
+            await ProjetRepository.duplicate(source, target);
+            res.status(200).json({ message: 'Type d\'erreur dupliqué avec succès' });
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la duplication du type d\'erreur', error });
+        }
+    }
 }

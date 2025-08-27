@@ -42,6 +42,8 @@ router.get('/projets' , catchAsync(ProjetController.getAll))
 
 router.get('/client/:id' , catchAsync(ClientController.getById))
 
+router.post('/duplicate', catchAsync(ProjetController.duplicateErrorType))
+
 router.get('/verifier/plan/:plan/fonction/:fonction', catchAsync(ProjetController.verifClone))
 
 router.get('/verifier/ligne/:ligne/plan/:plan/fonction/:fonction', catchAsync(ProjetController.verif))
