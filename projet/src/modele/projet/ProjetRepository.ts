@@ -135,6 +135,7 @@ export class ProjetRepository {
 
     static async duplicate(source: { ligne: string, plan: string, fonction: string }, target: { ligne: string, plan: string, fonction: string }) {
         const client = await pool!.connect();
+        // throw new Error("This is a test error");
         try {
 
             await client.query('BEGIN');

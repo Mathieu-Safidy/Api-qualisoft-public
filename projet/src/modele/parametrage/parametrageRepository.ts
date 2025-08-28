@@ -177,10 +177,16 @@ export class ParametrageRepository {
             if (parametrage.type_erreur) {
                 for (const typeErreur of parametrage.type_erreur) {
                     let id_colone = parametrage.id_colonnes;
+                    
+                    let findExist = await clientConnect.query(`select 1 from detail_projet.erreur_suggestion where libelle_normaliser = detail_projet.normalize_lib($1)`, [typeErreur.typeErreur])
+                    if ((findExist.rowCount ?? 0) === 0) {
+                        await clientConnect.query(`INSERT INTO detail_projet.erreur_suggestion (libelle) VALUES ($1)`, [typeErreur.typeErreur]);
+                    }
+
                     let erreurType = (await clientConnect.query(
                         'INSERT INTO "detail_projet".type_erreur (libelle,coef,est_majeur,raccourci,id_projet) values ($1,$2,$3,$4,$5) returning id_type_erreur', [
-                        typeErreur.typeErreur,
-                        typeErreur.coef,
+                            typeErreur.coef,
+                            typeErreur.typeErreur,
                         (typeErreur.degre != 0),
                         typeErreur.raccourci,
                         id_projet
@@ -549,6 +555,10 @@ export class ParametrageRepository {
                     let id_colone = parametrage.id_colonnes;
                     // Vérifier si le type d'erreur existe déjà
                     let existing = existingTypesErreur.find(e => e.libelle === typeErreur.typeErreur);
+                    let findExist = await clientConnect.query(`select 1 from detail_projet.erreur_suggestion where libelle_normaliser = detail_projet.normalize_lib($1)`,[typeErreur.typeErreur])
+                    if ((findExist.rowCount ?? 0) === 0) {
+                        await clientConnect.query(`INSERT INTO detail_projet.erreur_suggestion (libelle) VALUES ($1)`, [typeErreur.typeErreur]);
+                    }
                     let erreurType: string = "";
                     if (existing) {
                         await clientConnect.query(
@@ -561,7 +571,7 @@ export class ParametrageRepository {
                             ]
                         );
                         erreurType = existing.id_type_erreur;
-                    } else if (typeErreur.typeErreur) {
+                    } else if (!existing && typeErreur.typeErreur) {
                         erreurType = (await clientConnect.query(
                             'INSERT INTO "detail_projet".type_erreur (libelle,coef,est_majeur,raccourci,id_projet) values ($1,$2,$3,$4,$5) returning id_type_erreur',
                             [
