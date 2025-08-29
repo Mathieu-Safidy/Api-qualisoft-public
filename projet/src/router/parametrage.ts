@@ -38,6 +38,8 @@ router.get('/operations', catchAsync(OperationController.getAllOperations))
 
 router.get('/unites', catchAsync(UniteController.getUnites))
 
+router.get('/unites/:id_unite', catchAsync(UniteController.getUnitesById))
+
 router.get('/projets' , catchAsync(ProjetController.getAll))
 
 router.get('/client/:id' , catchAsync(ClientController.getById))
