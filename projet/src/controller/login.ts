@@ -6,37 +6,6 @@ export class Login {
 	static async log(req: Request, res: Response) {
 		const { username, password } = req.body
 		const mode = username.length == 5 ? 'gpao' : 'ldap'
-		// switch (mode) {
-		// 	case 'ldap':
-		// 		try {
-		// 			const data: { user: User; token: string } =
-		// 				await Fonction.login(username, password, mode)
-
-		// 			res.cookie('token', data.token, {
-		// 				httpOnly: true,
-		// 				secure: false, // Disable HTTPS
-		// 				sameSite: 'strict',
-		// 				maxAge: 1000 * 60 * 60,
-		// 			})
-
-		// 			res.status(200).json({
-		// 				message: 'Connexion réussie',
-		// 				user: new User(
-		// 					data.user.matricule,
-		// 					data.user.fullname,
-		// 					data.user.id_ligne,
-		// 					data.user.ligne,
-		// 					data.user.email
-		// 				),
-		// 			})
-		// 		} catch (error) {
-		// 			res.status(401).json({
-		// 				message: 'Erreur lors de la connection ',
-		// 				erreur: error,
-		// 			})
-		// 		}
-		// 		break
-		// 	case 'gpao':
 		try {
 			const data: { user: User; token: string } = await Fonction.login(
 				username,
@@ -69,12 +38,6 @@ export class Login {
 				erreur: error,
 			})
 		}
-
-		// 		break
-		// 	default:
-		// 		res.status(404).json({ message: 'Acces non autorisé !' })
-		// 		break
-		// }
 	}
 
 	static async logout(req: Request, res: Response) {

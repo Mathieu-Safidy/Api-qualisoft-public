@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import { Parametrage } from "../modele/parametrage/parametrage";
 import { ParametrageRepository } from "../modele/parametrage/parametrageRepository";
 
@@ -49,6 +50,7 @@ export class ParametrageController {
 
         return res.status(201).json({ parametre: id_projet,message: 'Paramétrage créé' });
     }
+
     static async update(req: any, res: any) {
         const data = req.body;
         // let clientName = data.client_nom || null; //
@@ -98,5 +100,16 @@ export class ParametrageController {
         const id_projet = await ParametrageRepository.update(parametrage);
 
         return res.status(201).json({ parametre: id_projet,message: 'Paramétrage créé' });
+    }
+
+    static async updateOptional(req: Request, res: Response) {
+        const corps = req.body;
+        try {
+            const updated = await ParametrageRepository.upSertOptional(corps);
+            return res.status(200).json({ parametre: updated, message: 'Paramétrage mis à jour' });
+        } catch (error) {
+            console.error('Error updating optional parameters:', error);
+            return res.status(500).json({ message: 'Erreur lors de la mise à jour des paramètres optionnels' });
+        }
     }
 }

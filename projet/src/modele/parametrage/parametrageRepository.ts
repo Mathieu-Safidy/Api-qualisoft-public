@@ -4,6 +4,7 @@ import { Parametrage } from "./parametrage";
 import { Projet } from "../projet/Projet";
 import { Client } from "../client/Client";
 import { ObjectifQualite } from "../objectIf/ObjectifQualite";
+import { Utilitaire } from "../utilitaire/Utilitaire";
 
 export class ParametrageRepository {
     static async create(parametrage: Parametrage): Promise<any> {
@@ -258,22 +259,6 @@ export class ParametrageRepository {
         try {
             await clientConnect.query('BEGIN');
 
-            // Gestion du client
-            // let id_client = null;
-            // if (parametrage.client_nom) {
-            //     const client = new Client({ nom: parametrage.client_nom });
-            //     const verif = await client.verifier();
-            //     if (!verif) {
-            //         id_client = (await clientConnect.query(
-            //             'INSERT INTO "detail_projet".client (nom) VALUES ($1) RETURNING id_client',
-            //             [client.nom]
-            //         )).rows[0].id_client;
-            //     } else {
-            //         id_client = verif.id_client;
-            //     }
-            // }
-
-            // Update du projet
             await clientConnect.query(
                 `UPDATE "detail_projet".projet
             SET nom_interlocuteur = $1,
@@ -644,6 +629,34 @@ export class ParametrageRepository {
             throw error;
         } finally {
             clientConnect.release();
+        }
+    }
+
+    static async upSertOptional(coprs : {id: string|number ,value: any, name : string} ) {
+        try {
+            const {id , value, name} = coprs;
+            if (id != -1) {
+                let [table, column] = name.split(':');
+                let values = {
+                    id: id,
+                    [column]: value
+                };
+                let db = pool!;
+                let result = await (await Utilitaire.executeSql('UPDATE', table, values, db, 'id = ' + id)).rows;
+                return result;
+            } else {
+                let [table, column] = name.split(':');
+                let values = {
+                    id: null,
+                    [column]: value
+                };
+                let db = pool!;
+                let result = await (await Utilitaire.executeSql('INSERT', table, values, db)).rows;
+                return result;
+            }
+
+        } catch (error) {
+            throw error;
         }
     }
 }

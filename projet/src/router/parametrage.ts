@@ -24,6 +24,8 @@ router.use(setUserMiddleware)
 
 router.post('/update', catchAsync(ParametrageController.update))
 
+router.post('/updateUnit', catchAsync(ParametrageController.updateOptional))
+
 router.get('/users', catchAsync(UserController.getAllUsers))
 
 router.post('/parametrage', catchAsync(ParametrageController.create))
