@@ -105,11 +105,24 @@ export class ParametrageController {
     static async updateOptional(req: Request, res: Response) {
         const corps = req.body;
         try {
+            console.log('Request body for optional parameters update:', corps);
             const updated = await ParametrageRepository.upSertOptional(corps);
             return res.status(200).json({ parametre: updated, message: 'Paramétrage mis à jour' });
         } catch (error) {
             console.error('Error updating optional parameters:', error);
             return res.status(500).json({ message: 'Erreur lors de la mise à jour des paramètres optionnels' });
+        }
+    }
+
+    static async delete(req: Request, res: Response) {
+        const { id, name } = req.body;
+        try {
+            console.log('Request body for delete:', req.body);
+            await ParametrageRepository.deleted(id,name);
+            return res.status(200).json({ status:200, message: 'Paramètre supprimé' });
+        } catch (error) {
+            console.error('Error deleting parameter:', error);
+            return res.status(500).json({ status:500 , message: 'Erreur lors de la suppression du paramètre' });
         }
     }
 }

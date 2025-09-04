@@ -59,9 +59,10 @@ export class ProjetRepository {
             if (id_projet) {
                 const result = await pool!.query(`SELECT * FROM  "detail_projet".etape_qualite where id_projet = $1 `, [id_projet]);
                 return result.rows;
-            } else {
-                throw new Error('Projet non reconnue');
             }
+            //  else {
+            //     throw new Error('Projet non reconnue');
+            // }
         } catch (error) {
             throw error;
         }

@@ -18,7 +18,7 @@ export class ProjetController {
             if (result.projet) {
                 res.status(200).json(result);
             } else {
-                res.status(404).json({ message: 'Projet non trouvé' });
+                res.status(501).json({ message: 'Projet non trouvé' });
             }
         } catch (error) {
             res.status(500).json({ message: 'Erreur lors de la vérification du projet', error });

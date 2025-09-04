@@ -632,29 +632,47 @@ export class ParametrageRepository {
         }
     }
 
-    static async upSertOptional(coprs : {id: string|number ,value: any, name : string} ) {
+    static async upSertOptional(coprs : {id: string|number ,value: any, name : string, deleted: boolean} ) {
         try {
-            const {id , value, name} = coprs;
-            if (id != -1) {
+            const {id , value, name, deleted = false} = coprs;
+            if (id != -1 && !deleted) {
                 let [table, column] = name.split(':');
-                let values = {
-                    id: id,
-                    [column]: value
-                };
+                let [schema,name_table] = table.split('.');
+                let values = (value && typeof value === 'object' && Object.keys(value).length > 0)
+                ? { id, ...value }           // merge id + objet
+                : { id, [column]: value };   // valeur brute
+
                 let db = pool!;
-                let result = await (await Utilitaire.executeSql('UPDATE', table, values, db, 'id = ' + id)).rows;
+                let result = await (await Utilitaire.executeSql('UPDATE', table, values, db, `id_${name_table} = ` + id)).rows;
                 return result;
-            } else {
+            } else if (id == -1 && !deleted) {
                 let [table, column] = name.split(':');
-                let values = {
-                    id: null,
-                    [column]: value
-                };
+                
+                let val = value;
+                val = (value && typeof value === 'object' && Object.keys(value).length > 0)
+                ? { id: null, ...value }
+                : { id: null, value };
+
+                let values = val;
+                
                 let db = pool!;
                 let result = await (await Utilitaire.executeSql('INSERT', table, values, db)).rows;
                 return result;
+            } else if (id != -1 && deleted) {
+                let [table, column] = name.split(':');
+                let db = pool!;
+                await (await Utilitaire.executeSql('DELETE', table, { id }, db)).rows;
             }
 
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async deleted(id:number|string,table:string) {
+        try {
+            let db = pool!;
+            await (await Utilitaire.executeSql('DELETE', table, { id }, db)).rows;
         } catch (error) {
             throw error;
         }
