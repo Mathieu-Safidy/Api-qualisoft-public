@@ -661,7 +661,11 @@ export class ParametrageRepository {
             } else if (id != -1 && deleted) {
                 let [table, column] = name.split(':');
                 let db = pool!;
-                await (await Utilitaire.executeSql('DELETE', table, { id }, db)).rows;
+               if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+                   await (await Utilitaire.executeSql('DELETE', table, { ...value }, db, value)).rows;
+               } else {
+                   await (await Utilitaire.executeSql('DELETE', table, { id }, db)).rows;
+               }
             }
 
         } catch (error) {
