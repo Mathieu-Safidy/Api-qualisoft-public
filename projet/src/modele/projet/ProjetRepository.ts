@@ -23,12 +23,16 @@ export class ProjetRepository {
             const etape_qualite = await this.verifEtapeQualite(result.rows[0]?.id_projet);
             const type_erreur = await this.verifierTypeErreur(result.rows[0]?.id_projet);
             const interlocuteurs = await this.verifierInterlocuteur(result.rows[0]?.id_projet);
+            const bcq_donnees = await this.verifierBcqDonnees(result.rows[0]?.id_projet);
+            const info_bcq = await this.verifierInfoBcq(result.rows[0]?.id_projet);
             // console.log('id projet', result.rows[0]?.id_projet , etape_qualite , type_erreur)
             return {
                 projet: result.rows[0],
                 etape: etape_qualite,
                 erreur: type_erreur,
-                interlocuteurs: interlocuteurs
+                interlocuteurs: interlocuteurs,
+                bcq_donnees: bcq_donnees,
+                info_bcq: info_bcq
             };
         } catch (error) {
             console.error('Une erreur est survenue lors de la vérification du projet:', error);
@@ -41,6 +45,7 @@ export class ProjetRepository {
             const etape_qualite = await this.verifEtapeQualite(result.rows[0]?.id_projet);
             const type_erreur = await this.verifierTypeErreur(result.rows[0]?.id_projet);
             const interlocuteurs = await this.verifierInterlocuteur(result.rows[0]?.id_projet);
+            
             // console.log('id projet', result.rows[0]?.id_projet , etape_qualite , type_erreur)
             return {
                 projet: result.rows[0],
@@ -119,6 +124,30 @@ export class ProjetRepository {
     static async verifierInterlocuteur(id_projet: string) {
         try {
             const result = await pool!.query(`SELECT * FROM "detail_projet".interlocuteur WHERE id_projet = $1`, [id_projet]);
+            return result.rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async verifierInfoBcq(id_projet: string) {
+        try {
+            const result = await pool!.query(`
+                SELECT 
+                ib.id_info_bcq,ib.libelle,ib.valeur,pb.id_projet  
+                FROM detail_projet.info_bcq ib 
+                JOIN detail_projet.param_bcq pb 
+                ON ib.id_param_bcq = pb.id_param_bcq 
+                WHERE pb.id_projet = $1`, [id_projet]);
+            return result.rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async verifierBcqDonnees(id_projet: string) {
+        try {
+            const result = await pool!.query(`SELECT * FROM detail_projet.param_bcq where id_projet = $1`, [id_projet]);
             return result.rows;
         } catch (error) {
             throw error;

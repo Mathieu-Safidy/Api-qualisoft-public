@@ -638,6 +638,7 @@ export class ParametrageRepository {
             if (id != -1 && !deleted) {
                 let [table, column] = name.split(':');
                 let [schema,name_table] = table.split('.');
+                console.log('value',value)
                 let values = (value && typeof value === 'object' && Object.keys(value).length > 0)
                 ? { id, ...value }           // merge id + objet
                 : { id, [column]: value };   // valeur brute

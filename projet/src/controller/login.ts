@@ -34,7 +34,7 @@ export class Login {
 			})
 		} catch (error) {
 			res.status(401).json({
-				message: 'Erreur lors de la connection ',
+				message: 'Erreur lors de la connexion ',
 				erreur: error,
 			})
 		}
@@ -51,7 +51,6 @@ export class Login {
 
 	static async verifyToken(req: Request, res: Response) {
 		const token = req.cookies?.token || null
-		// const fonction = new Fonction()
 		if (token) {
 			const decoded = await Fonction.verifyToken(token)
 			res.status(200).json({ user: decoded })
@@ -63,11 +62,9 @@ export class Login {
 	static async verifyRole(req: Request, res: Response) {
 		const token = req.cookies?.token || null
 		const page = req.params.page || ''
-		// const fonction = new Fonction()
 		if (token) {
 			try {
 				const decoded: any = await Fonction.verifyToken(token)
-				// res.status(200).json({ message: 'Role vérifié avec succès' });
 				if (
 					typeof decoded === 'object' &&
 					decoded !== null &&

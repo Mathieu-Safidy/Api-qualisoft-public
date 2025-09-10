@@ -11,6 +11,7 @@ export class Utilitaire {
             return { sql: '' };
         }
         const keys = Object.keys(value).filter(key => value[key] !== null);
+        console.log('Keys for SQL operation:', keys);
 
         if (operation === 'SELECT') {
             return {
@@ -75,6 +76,7 @@ export class Utilitaire {
     ) {
         const { sql } = Utilitaire.formateSql(operation, table, value, where, returning);
         let params: any[] = [];
+        console.log('Generated SQL:', sql, value);
         const keys = Object.keys(value).filter(key => value[key] !== null);
         if (operation === 'INSERT' || operation === 'UPDATE') {
             params = keys.filter(key => key !== 'id').map(key => { console.log(`Parameter for ${key}:`, value[key]) ; return value[key]});
