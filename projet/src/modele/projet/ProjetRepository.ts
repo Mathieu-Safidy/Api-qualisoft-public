@@ -25,6 +25,7 @@ export class ProjetRepository {
             const interlocuteurs = await this.verifierInterlocuteur(result.rows[0]?.id_projet);
             const bcq_donnees = await this.verifierBcqDonnees(result.rows[0]?.id_projet);
             const info_bcq = await this.verifierInfoBcq(result.rows[0]?.id_projet);
+            const param_externe = await this.verifierChampExterne(result.rows[0]?.id_projet);
             // console.log('id projet', result.rows[0]?.id_projet , etape_qualite , type_erreur)
             return {
                 projet: result.rows[0],
@@ -32,7 +33,8 @@ export class ProjetRepository {
                 erreur: type_erreur,
                 interlocuteurs: interlocuteurs,
                 bcq_donnees: bcq_donnees,
-                info_bcq: info_bcq
+                info_bcq: info_bcq,
+                param_externe: param_externe
             };
         } catch (error) {
             console.error('Une erreur est survenue lors de la vérification du projet:', error);
@@ -59,15 +61,14 @@ export class ProjetRepository {
         }
     }
 
+
+
     static async verifEtapeQualite(id_projet: string) {
         try {
             if (id_projet) {
                 const result = await pool!.query(`SELECT * FROM  "detail_projet".etape_qualite where id_projet = $1 `, [id_projet]);
                 return result.rows;
             }
-            //  else {
-            //     throw new Error('Projet non reconnue');
-            // }
         } catch (error) {
             throw error;
         }
@@ -139,6 +140,21 @@ export class ProjetRepository {
                 JOIN detail_projet.param_bcq pb 
                 ON ib.id_param_bcq = pb.id_param_bcq 
                 WHERE pb.id_projet = $1`, [id_projet]);
+            return result.rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async verifierChampExterne(id_projet: string) {
+        try {
+            const result = await pool!.query(`
+                SELECT 
+                cpi.libelle , pe.id_param_externe , cpi.id_champ_param_interne , pe.onglet , pe.colonne , pe.id_projet   
+                FROM detail_projet.param_externe pe 
+                JOIN detail_projet.champ_param_interne cpi 
+                ON pe.id_champ_param_interne = cpi.id_champ_param_interne 
+                WHERE pe.id_projet = $1`, [id_projet]);
             return result.rows;
         } catch (error) {
             throw error;

@@ -34,24 +34,29 @@ export class Utilitaire {
             };
         } else if (operation === 'DELETE') {
             console.log('table', tables)
+
             let [schema,name_table] = tables.split('.');
             let column_id = `id_${name_table}`;
             let sql = '';
             
             
             console.log('WHERE clause for DELETE:', where);
-            if (where && typeof where === 'object') {
+            if (where === undefined ) {
                 // Build WHERE clause from object keys/values
-                const whereClauses = Object.entries(where)
+                // const whereClauses = Object.entries(where)
+                //     .map(([key, val], idx) => `${key} = '${val}'`)
+                //     .join(' AND ');
+                // where = whereClauses;
+                // console.log('Constructed WHERE clause:', whereClauses);
+                // Update value.id to array of values for params
+                // value.id = Object.values(where);
+                sql = `DELETE FROM ${tables} WHERE ${column_id} = $1`
+            } else if(where && typeof where === 'object' && Object.keys(where).length > 0) {
+                 const whereClauses = Object.entries(where)
                     .map(([key, val], idx) => `${key} = '${val}'`)
                     .join(' AND ');
                 where = whereClauses;
-                // Update value.id to array of values for params
-                // value.id = Object.values(where);
-            }
-
-            if (where === undefined && where === '' && where === null) {
-                sql = `DELETE FROM ${tables} WHERE ${column_id} = $1`
+                sql = `DELETE FROM ${tables} WHERE 1=1 and ${where}`
             } else {
                 sql = `DELETE FROM ${tables} WHERE 1=1 and ${where}`
             }
