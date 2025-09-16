@@ -92,6 +92,8 @@ export class Utilitaire {
                 params = [value.id];
             }
         }
+
+        console.log('SQL Parameters:', params, 'sql',sql);
         return db.query(sql, params);
     }
 

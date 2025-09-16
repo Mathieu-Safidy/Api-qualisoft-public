@@ -658,6 +658,7 @@ export class ParametrageRepository {
                 
                 let db = pool!;
                 let result = await (await Utilitaire.executeSql('INSERT', table, values, db)).rows;
+                console.log('result returning ', result)
                 return result;
             } else if (id != -1 && deleted) {
                 let [table, column] = name.split(':');
@@ -679,7 +680,7 @@ export class ParametrageRepository {
     static async deleted(id:number|string,table:string,data: any='') {
         try {
             let db = pool!;
-            await (await Utilitaire.executeSql('DELETE', table, { id }, db)).rows;
+            (await Utilitaire.executeSql('DELETE', table, { id }, db));
         } catch (error) {
             throw error;
         }
