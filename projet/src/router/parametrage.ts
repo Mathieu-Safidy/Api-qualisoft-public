@@ -12,6 +12,28 @@ import { ParametrageController } from '../controller/ParametrageController'
 import { Client } from '../modele/client/Client'
 import { ClientController } from '../controller/ClientController'
 import { UserController } from '../controller/UserController'
+import { MigrationController } from '../controller/MigrationController'
+import multer from "multer";
+import fs from "fs";
+
+
+const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            // Définir le dossier de destination
+            const uploadDir = 'uploads/';
+            // Create the directory if it doesn't exist
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir);
+            }
+            cb(null, 'uploads/');
+        },
+        filename: (req, file, cb) => {
+            // Définir le nom du fichier
+            cb(null, Date.now() + '-' + file.originalname);
+        }
+        });
+
+const upload = multer({ storage: storage });
 
 const router = Router()
 
@@ -21,6 +43,11 @@ router.use(setUserMiddleware)
 // router.get('/parametrage', setUserMiddleware, capacityMiddleware(4), async (req: any, res: any) => {
 //     return res.status(200).json({ message: 'Paramétrage reçu' })
 // })
+router.post('/import/file', upload.single('file'), catchAsync(MigrationController.importFichier))
+
+router.post('/import/data', catchAsync(MigrationController.importData))
+
+router.post('/migre/column', catchAsync(MigrationController.getColonne))
 
 router.post('/update', catchAsync(ParametrageController.update))
 

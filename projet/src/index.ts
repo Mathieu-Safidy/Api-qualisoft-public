@@ -11,6 +11,8 @@ import parametrageRouter from './router/parametrage'
 import * as dotenv from 'dotenv'
 import { initDb } from './modele/database/db'
 import { catchAsync } from './controller/tets'
+import migration from './router/migration'
+import { link } from 'fs'
 
 // Setup environment
 dotenv.config()
@@ -33,7 +35,7 @@ app.use(cors({ credentials: true, origin: 'http://localhost:4200' }))
 app.use(cookieParser())
 const port = 5000
 
-app.use(express.json())
+app.use(express.json({}))
 
 // Swagger docs route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
@@ -50,6 +52,7 @@ app.get('/verify', Login.verifyToken)
 
 app.post('/api/login', Login.log)
 app.get('/api/logout', Login.logout)
+// app.use('/api/migrate', migration)
 app.use('/api', parametrageRouter)
 
 app.listen(port, () => {
