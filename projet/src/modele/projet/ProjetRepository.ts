@@ -130,6 +130,7 @@ export class ProjetRepository {
     static async verifierTypeErreur(id_projet: string) {
         try {
             let result = await pool!.query(`SELECT 
+                    DISTINCT ON (te.id_type_erreur,eq.operation_de_control)
                     te.id_type_erreur,
                     te.est_majeur ,
                     te.coef ,
@@ -344,20 +345,7 @@ export class ProjetRepository {
         }
     }
 
-    static async getRepartitionTypeOperation() {
-        try {
-            const result = await pool!.query(`
-                SELECT
-                COUNT(DISTINCT CASE WHEN type_de_controle = 0 THEN id_projet END) AS interne,
-                COUNT(DISTINCT CASE WHEN type_de_controle = 1 THEN id_projet END) AS bcq,
-                COUNT(DISTINCT CASE WHEN type_de_controle = 2 THEN id_projet END) AS externe
-                FROM detail_projet.etape_qualite;
-            `);
-            return result.rows[0];
-        } catch (error) {
-            throw error;
-        }
-    }
+   
 
     static async insertBatch<T>(connection: PoolClient, table: string, rows: T[]): Promise<void> {
         if (rows.length === 0) return;
