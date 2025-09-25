@@ -61,7 +61,46 @@ export class ProjetRepository {
         }
     }
 
+    static async getProjetActif(date_debut: string , date_fin: string): Promise<any> {
+        try {
+            const result = await axios.get(`${process.env.GPAO_API}/projets/actif/${date_debut}/${date_fin}`);
+            return {count: (result.data as any).count};
+        } catch (error) {
+            throw error;
+        }
+    }
 
+    static async getProjetParametrerActif(date_debut: string , date_fin: string, projet_actif: any[]): Promise<any> {
+        try {
+            const body = {
+                date_debut: date_debut,
+                date_fin: date_fin,
+                donne: projet_actif
+            }
+            const result = await axios.post(`${process.env.GPAO_API}/projets/parametrer`, body);
+            return result.data;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getProjetParametrer(): Promise<any> {
+        try {
+            const result = await pool!.query(`SELECT * FROM "detail_projet".projet ORDER BY id_ligne, id_plan, id_fonction`);
+            return result.rows.map((projet:any) => ({ id_plan: projet.id_plan, id_fonction: projet.id_fonction }));
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getNombreProjetParLigne(date_debut: string , date_fin: string): Promise<any> {
+        try {
+            const result = await axios.get(`${process.env.GPAO_API}/projets/actif/ligne/${date_debut}/${date_fin}`);
+            return result.data;
+        } catch (error) {
+            throw error;
+        }
+    }
 
     static async verifEtapeQualite(id_projet: string) {
         try {
@@ -179,6 +218,15 @@ export class ProjetRepository {
         }
     }
 
+    // static async getProjetActif(req: Request, res: Response) {
+    //     try {
+    //         const projets = await this.getAllProjetActif();
+    //         res.status(200).json(projets);
+    //     } catch (error) {
+    //         res.status(500).json({ message: 'Erreur lors de la récupération des projets actifs' });
+    //     }
+    // }
+
     static async duplicate(source: { ligne: string, plan: string, fonction: string }, target: { ligne: string, plan: string, fonction: string }) {
         const client = await pool!.connect();
         // throw new Error("This is a test error");
@@ -284,6 +332,30 @@ export class ProjetRepository {
             return result.rows[0].id_type_erreur;
         } catch (error) {
             throw error
+        }
+    }
+
+    static async getByLigne(ligne: string): Promise<any> {
+        try {
+            const result = await axios.get(`${process.env.GPAO_API}/lignes/MADAGASCAR/${ligne}`);
+            return result.data;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getRepartitionTypeOperation() {
+        try {
+            const result = await pool!.query(`
+                SELECT
+                COUNT(DISTINCT CASE WHEN type_de_controle = 0 THEN id_projet END) AS interne,
+                COUNT(DISTINCT CASE WHEN type_de_controle = 1 THEN id_projet END) AS bcq,
+                COUNT(DISTINCT CASE WHEN type_de_controle = 2 THEN id_projet END) AS externe
+                FROM detail_projet.etape_qualite;
+            `);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
         }
     }
 

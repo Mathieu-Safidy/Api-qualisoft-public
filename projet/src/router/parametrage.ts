@@ -15,6 +15,7 @@ import { UserController } from '../controller/UserController'
 import { MigrationController } from '../controller/MigrationController'
 import multer from "multer";
 import fs from "fs";
+import { Projet } from '../modele/projet/Projet'
 
 
 const storage = multer.diskStorage({
@@ -43,6 +44,8 @@ router.use(setUserMiddleware)
 // router.get('/parametrage', setUserMiddleware, capacityMiddleware(4), async (req: any, res: any) => {
 //     return res.status(200).json({ message: 'Paramétrage reçu' })
 // })
+
+
 router.post('/import/file', upload.single('file'), catchAsync(MigrationController.importFichier))
 
 router.post('/import/data', catchAsync(MigrationController.importData))
@@ -67,15 +70,27 @@ router.get('/typeTraitements', catchAsync(TypeTraitementController.getAllTypeTra
 
 router.get('/operations', catchAsync(OperationController.getAllOperations))
 
+router.get('/operations/repartition', catchAsync(OperationController.getRepartitionTypeOperation))
+
 router.get('/unites', catchAsync(UniteController.getUnites))
 
 router.get('/unites/:id_unite', catchAsync(UniteController.getUnitesById))
 
 router.get('/projets' , catchAsync(ProjetController.getAll))
 
+router.get('/projets/parametrer', catchAsync(ProjetController.getProjetParametrer))
+
+router.post('/projets/actif/parametrer', catchAsync(ProjetController.getProjetActifParametrer))
+
+router.get('/projets/actif/:date_debut/to/:date_fin' , catchAsync(ProjetController.getProjetActif))
+
+router.get('/projets/actif/lignes/:date_debut/to/:date_fin' , catchAsync(ProjetController.getProjetActifParLigne))
+
 router.get('/client/:id' , catchAsync(ClientController.getById))
 
 router.post('/duplicate', catchAsync(ProjetController.duplicateErrorType))
+
+router.get('/lignes/:ligne', catchAsync(ProjetController.getByLigne))
 
 router.get('/verifier/plan/:plan/fonction/:fonction', catchAsync(ProjetController.verifClone))
 

@@ -49,4 +49,55 @@ export class ProjetController {
             res.status(500).json({ message: 'Erreur lors de la duplication du type d\'erreur', error });
         }
     }
+
+    static async getProjetActif(req: Request, res: Response) {
+        const { date_debut, date_fin } = req.params;
+        try {
+            const result = await ProjetRepository.getProjetActif(date_debut, date_fin);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la récupération des projets actifs', error });
+        }
+    }
+
+    static async getProjetActifParametrer(req: Request, res: Response) {
+        try {
+            const { date_debut, date_fin , donnees } = req.body;
+            const result = await ProjetRepository.getProjetParametrerActif(date_debut, date_fin, donnees);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la récupération des projets paramétrés', error });
+        }
+    }
+
+    static async getProjetParametrer(req: Request, res: Response) {
+        try {
+            const result = await ProjetRepository.getProjetParametrer();
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la récupération des projets paramétrés', error });
+        }
+    }
+
+    static async getProjetActifParLigne(req: Request, res: Response) {
+        const { date_debut, date_fin } = req.params;
+        try {
+            const result = await ProjetRepository.getNombreProjetParLigne(date_debut, date_fin);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la récupération des projets actifs par ligne', error });
+        }
+    }
+
+    static async getByLigne(req: Request, res: Response) {
+        const { ligne } = req.params;
+        try {
+            const result = await ProjetRepository.getByLigne(ligne);
+            res.status(200).json(result);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
 }
