@@ -33,7 +33,7 @@ export class MigrationRepository {
                 columns,
                 rows: data
             }
-            const value = await axios.post(`${process.env.IMPORT_API}`, body)
+            const value = await axios.post(`${process.env.IMPORT_API}/import`, body)
             return value.data;
         } catch (error) {
             throw error;

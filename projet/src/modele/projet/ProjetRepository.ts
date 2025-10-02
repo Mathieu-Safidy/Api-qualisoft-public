@@ -86,8 +86,42 @@ export class ProjetRepository {
 
     static async getProjetParametrer(): Promise<any> {
         try {
-            const result = await pool!.query(`SELECT * FROM "detail_projet".projet ORDER BY id_ligne, id_plan, id_fonction`);
+            const result = await pool!.query(`
+                SELECT p.id_plan, p.id_fonction
+                FROM detail_projet.projet p
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM detail_projet.etape_qualite eq
+                    WHERE eq.id_projet = p.id_projet
+                    AND eq.seuil_qualite IS NOT NULL
+                );
+            `);
             return result.rows.map((projet:any) => ({ id_plan: projet.id_plan, id_fonction: projet.id_fonction }));
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getProjetActifs(anne: string): Promise<any> {
+        try {
+            const result = await pool!.query(`
+                WITH mois AS (
+                    SELECT generate_series(
+                        make_date($1, 1, 1),
+                        make_date($1, 12, 1),
+                        interval '1 month'
+                    )::date AS mois
+                )
+                SELECT 
+                    to_char(m.mois, 'mm') AS mois,
+                    to_char(m.mois, 'YYYY') AS anne,
+                    COALESCE(a.nb_plans, 0) AS nb_plans
+                FROM mois m
+                LEFT JOIN db_stat.action_mois_summary a
+                ON a.mois = m.mois
+                ORDER BY m.mois;
+            `, [anne]);
+            return result.rows;
         } catch (error) {
             throw error;
         }

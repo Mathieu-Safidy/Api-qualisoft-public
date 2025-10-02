@@ -16,4 +16,16 @@ export class VueActiviteController  {
             return res.status(500).json({ error: "Erreur lors de la récupération des activités" });
         }
     }
+
+    static async getAnneExcercice(req: Request, res: Response) {
+        try {
+            const response = await VueActiviteRepository.getAnneExcercice();
+            if (!response) {
+                return res.status(404).json({ error: "Aucune année d'exercice trouvée" });
+            }
+            return res.json(response);
+        } catch (error) {
+            return res.status(500).json({ error: "Erreur lors de la récupération des années d'exercice" });
+        }
+    }
 }

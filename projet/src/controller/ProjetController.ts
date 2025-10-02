@@ -99,5 +99,14 @@ export class ProjetController {
         }
     }
 
-
+    static async getProjetActifAnnuel(req: Request, res: Response) {
+        const { annee } = req.params;
+        try {
+            const result = await ProjetRepository.getProjetActifs(annee);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la récupération des projets actifs annuels', error });
+        }
+    
+    }
 }
