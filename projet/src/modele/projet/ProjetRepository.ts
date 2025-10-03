@@ -26,6 +26,7 @@ export class ProjetRepository {
             const bcq_donnees = await this.verifierBcqDonnees(result.rows[0]?.id_projet);
             const info_bcq = await this.verifierInfoBcq(result.rows[0]?.id_projet);
             const param_externe = await this.verifierChampExterne(result.rows[0]?.id_projet);
+            const param_interne = await this.verifierParamInterne();
             // console.log('id projet', result.rows[0]?.id_projet , etape_qualite , type_erreur)
             return {
                 projet: result.rows[0],
@@ -34,7 +35,8 @@ export class ProjetRepository {
                 interlocuteurs: interlocuteurs,
                 bcq_donnees: bcq_donnees,
                 info_bcq: info_bcq,
-                param_externe: param_externe
+                param_externe: param_externe,
+                param_interne: param_interne
             };
         } catch (error) {
             console.error('Une erreur est survenue lors de la vérification du projet:', error);
@@ -57,6 +59,15 @@ export class ProjetRepository {
             };
         } catch (error) {
             console.error('Une erreur est survenue lors de la vérification du projet:', error);
+            throw error;
+        }
+    }
+
+    static async verifierParamInterne() {
+        try {
+            const result = await pool!.query(`select * from detail_projet.champ_param_interne where fixedefault = false`);
+            return result.rows;
+        } catch (error) {
             throw error;
         }
     }

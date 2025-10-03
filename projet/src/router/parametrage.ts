@@ -53,7 +53,8 @@ router.post('/import/file', catchAsync(
                 target: `${process.env.IMPORT_API}` || '',
                 changeOrigin: true,
                 onProxyReq: (proxyReq: any, req:Request, res:Response) => {
-                    console.log('Proxying request to:', req.body);
+                    // console.log('Proxying request to:', req.body);
+                    
                 } 
             } as any 
         )
@@ -175,6 +176,8 @@ router.get('/client/:id', catchAsync(ClientController.getById))
 router.post('/duplicate', catchAsync(ProjetController.duplicateErrorType))
 
 router.get('/lignes/:ligne', catchAsync(ProjetController.getByLigne))
+
+router.get('/verifier/param_externe/:id_projet', catchAsync(ProjetController.verifierExterne))
 
 router.get('/verifier/plan/:plan/fonction/:fonction', catchAsync(ProjetController.verifClone))
 

@@ -51,6 +51,7 @@ app.get('/verify/:page', catchAsync(Login.verifyRole))
 app.get('/verify', Login.verifyToken)
 
 app.post('/api/login', Login.log)
+
 app.get('/api/logout', Login.logout)
 // app.use('/api/migrate', migration)
 app.use('/api', parametrageRouter)

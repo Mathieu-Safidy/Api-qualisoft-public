@@ -24,6 +24,20 @@ export class ProjetController {
             res.status(500).json({ message: 'Erreur lors de la vérification du projet', error });
         }
     }
+
+    static async verifierExterne(req: Request, res: Response) {
+        const { id_projet } = req.params;
+        try {
+            const result = await ProjetRepository.verifierChampExterne(id_projet);
+            if (result) {
+                res.status(200).json(result);
+            } else {
+                res.status(404).json({ message: 'Aucun paramètre externe trouvé pour ce projet' });
+            }
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la vérification des paramètres externes', error });
+        }
+    }
  
     static async verifClone(req: Request, res: Response) {
         const { plan, fonction } = req.params;
