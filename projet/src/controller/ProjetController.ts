@@ -86,6 +86,8 @@ export class ProjetController {
 
     static async getProjetParametrer(req: Request, res: Response) {
         try {
+            console.log('getProjetParametrer called');
+            
             const result = await ProjetRepository.getProjetParametrer();
             res.status(200).json(result);
         } catch (error) {

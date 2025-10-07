@@ -17,6 +17,7 @@ export class ProjetRepository {
         }
     }
 
+ 
     static async verifier(ligne: string, plan: string, fonction: string) {
         try {
             const result = await pool!.query(`select * from "detail_projet".projet where (id_ligne) = ($1) and (id_plan) = ($2) and (id_fonction) = ($3)`, [ligne, plan, fonction]);
@@ -98,7 +99,7 @@ export class ProjetRepository {
     static async getProjetParametrer(): Promise<any> {
         try {
             const result = await pool!.query(`
-                SELECT p.id_plan, p.id_fonction
+                SELECT p.id_plan, p.id_fonction, p.id_ligne , p.id_projet
                 FROM detail_projet.projet p
                 WHERE EXISTS (
                     SELECT 1
@@ -107,7 +108,7 @@ export class ProjetRepository {
                     AND eq.seuil_qualite IS NOT NULL
                 );
             `);
-            return result.rows.map((projet:any) => ({ id_plan: projet.id_plan, id_fonction: projet.id_fonction }));
+            return result.rows.map((projet:any) => ({ id_plan: projet.id_plan, id_fonction: projet.id_fonction, id_ligne: projet.id_ligne , id_projet:  projet.id_projet }));
         } catch (error) {
             throw error;
         }

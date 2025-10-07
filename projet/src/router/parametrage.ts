@@ -100,6 +100,8 @@ router.post('/duplicate', catchAsync(ProjetController.duplicateErrorType))
 
 router.get('/lignes/:ligne', catchAsync(ProjetController.getByLigne))
 
+router.get('/type-erreurs/ligne/:ligne/plan/:plan/fonction/:fonction', catchAsync(ErreurController.getAllTypeErreurs))
+
 router.get('/verifier/param_externe/:id_projet', catchAsync(ProjetController.verifierExterne))
 
 router.get('/verifier/plan/:plan/fonction/:fonction', catchAsync(ProjetController.verifClone))
