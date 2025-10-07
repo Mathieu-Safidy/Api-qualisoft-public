@@ -40,94 +40,17 @@ const upload = multer();
 const router = Router()
 
 router.use(setUserMiddleware)
-// router.use()
-
-// router.get('/parametrage', setUserMiddleware, capacityMiddleware(4), async (req: any, res: any) => {
-//     return res.status(200).json({ message: 'Paramétrage reçu' })
-// })
-
 
 router.post('/import/file', catchAsync(
         createProxyMiddleware(
             {
                 target: `${process.env.IMPORT_API}` || '',
-                changeOrigin: true,
-                onProxyReq: (proxyReq: any, req:Request, res:Response) => {
-                    // console.log('Proxying request to:', req.body);
-                    
-                } 
+                changeOrigin: true
             } as any 
         )
     )
 )
-// router.post('/import/file', upload.single("file"), async (req, res) => {
-//     try {
-//         console.log("Requête reçue pour importation de fichier", req);
-        
-//          const response = await fetch(`${process.env.IMPORT_API}/import/file`, {
-//             method: "POST",
-//             body: req,       // flux brut, inchangé
-//             headers: Object.fromEntries(
-//                 Object.entries(req.headers).map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : v || ''])
-//             )
-//         });
 
-//         const text = await response.text();
-//         console.log("Réponse microservice brute:", text);
-        
-
-//         res.status(response.status).send(text);
-        // req.file est géré par multer
-        // if (req.file) {
-        //     const formData = new FormData();
-        //     formData.append("file", req.file.buffer, {
-        //         filename: req.file.originalname,
-        //         contentType: req.file.mimetype
-        //     });
-
-        //     // ajouter les autres champs
-        //     Object.keys(req.body).forEach(key => {
-        //         formData.append(key, req.body[key]);
-        //     });
-
-        //     formData.append("dbUrl", process.env.DATABASE_URL || "");
-        //     const contentLength = await new Promise<string>((resolve, reject) => {
-        //         formData.getLength((err, length) => {
-        //             if (err) {
-        //             console.error('Erreur calcul Content-Length:', err);
-        //             return reject(err);
-        //             }
-        //             resolve(length.toString());
-        //         });
-        //     });
-        //     const response = await fetch(`${process.env.IMPORT_API}/import/file`, {
-        //         method: "POST",
-        //         body: formData as any,
-        //         headers: {...formData.getHeaders(),
-        //             'Content-Length': contentLength
-        //         }, // très important pour busboy
-        //     });
-            
-        //     const raw = await response.text();
-        //     console.log("Réponse microservice brute:", raw , 'header ', formData.getHeaders());
-
-        //     if (!response.ok) {
-        //         return res.status(response.status).send(raw);
-        //     }
-
-        //     // si JSON valide
-        //     try {
-        //         const json = JSON.parse(raw);
-        //         return res.json(json);
-        //     } catch {
-        //         return res.send(raw);
-        //     }
-        // }
-//     } catch (err) {
-//         console.error("Erreur proxy:", err);
-//         res.status(500).send("Erreur proxy");
-//     }
-// });
 
 router.post('/import/data', catchAsync(MigrationController.importData))
 

@@ -20,18 +20,18 @@ initDb()
 
 ;(global as any).__app_name = process.env.APP_NAME || 'qualisoft'
 
-const routerPrincipal: Record<
-	string,
-	(req: Request, res: Response) => Promise<void>
-> = {
-	login: Login.log,
-}
+// const routerPrincipal: Record<
+// 	string,
+// 	(req: Request, res: Response) => Promise<void>
+// > = {
+// 	login: Login.log,
+// }
 
 const swaggerSpec = YAML.load(path.join(__dirname, '../swagger.yaml'))
 
 const app = express()
 
-app.use(cors({ credentials: true, origin: 'http://localhost:4200' }))
+app.use(cors({ credentials: true, origin: '*' }))
 app.use(cookieParser())
 const port = 5000
 
