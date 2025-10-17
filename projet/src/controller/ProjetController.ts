@@ -10,6 +10,7 @@ export class ProjetController {
             res.status(401).json({message:'Une erreur s\'est produite' })
         }
     }
+
     static async verif(req: Request, res: Response) {
         const { ligne, plan, fonction } = req.params;
         try {

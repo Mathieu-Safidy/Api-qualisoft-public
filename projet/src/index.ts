@@ -30,8 +30,19 @@ initDb()
 const swaggerSpec = YAML.load(path.join(__dirname, '../swagger.yaml'))
 
 const app = express()
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*').split(',');
 
-app.use(cors({ credentials: true, origin: '*' }))
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS non autorisé : ' + origin));
+    }
+  },
+  credentials: true
+}));
+// app.use(cors({ credentials: true, origin: '*' }))
 app.use(cookieParser())
 const port = 5000
 

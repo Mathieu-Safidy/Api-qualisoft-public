@@ -175,26 +175,52 @@ export class ProjetRepository {
 
     static async verifierTypeErreur(id_projet: string) {
         try {
+            // let result = await pool!.query(`SELECT 
+            //         DISTINCT ON (te.id_type_erreur,eq.operation_de_control)
+            //         te.id_type_erreur,
+            //         te.est_majeur ,
+            //         te.coef ,
+            //         te.raccourci ,
+            //         te.libelle AS libelle_erreur,
+            //         eq.id_etape_qualite,
+            //         eq.operation_a_controller,
+            //         eq.operation_de_control,
+            //         te.id_projet,
+            //         CASE WHEN ev.id_type_erreur IS NOT NULL THEN true ELSE false END AS valable
+            //         FROM detail_projet.type_erreur te
+            //         CROSS JOIN detail_projet.etape_qualite eq
+            //         LEFT JOIN detail_projet.erreur_valable ev
+            //         ON ev.id_type_erreur = te.id_type_erreur
+            //         AND ev.id_etape_qualite = eq.id_etape_qualite
+            //         WHERE te.id_projet = $1
+            //         AND eq.id_projet = $1
+            //         ORDER BY te.id_type_erreur, eq.operation_de_control;`
+            //     , [id_projet]);
             let result = await pool!.query(`SELECT 
-                    DISTINCT ON (te.id_type_erreur,eq.operation_de_control)
-                    te.id_type_erreur,
-                    te.est_majeur ,
-                    te.coef ,
-                    te.raccourci ,
-                    te.libelle AS libelle_erreur,
-                    eq.id_etape_qualite,
-                    eq.operation_de_control,
-                    te.id_projet,
-                    CASE WHEN ev.id_type_erreur IS NOT NULL THEN true ELSE false END AS valable
-                    FROM detail_projet.type_erreur te
-                    CROSS JOIN detail_projet.etape_qualite eq
-                    LEFT JOIN detail_projet.erreur_valable ev
-                    ON ev.id_type_erreur = te.id_type_erreur
-                    AND ev.id_etape_qualite = eq.id_etape_qualite
-                    WHERE te.id_projet = $1
-                    AND eq.id_projet = $1
-                    ORDER BY te.id_type_erreur, eq.operation_de_control;`
-                , [id_projet]);
+                te.id_type_erreur,
+                te.est_majeur ,
+                te.coef ,
+                te.raccourci ,
+                te.libelle as libelle_erreur,
+                eq.id_etape_qualite,
+                eq.operation_a_controller,
+                eq.operation_de_control,
+                eq.id_projet,    
+                CASE 
+                    WHEN ev.id_etape_qualite IS NOT NULL 
+                        AND ev.id_type_erreur IS NOT NULL 
+                    THEN true 
+                    ELSE false 
+                END AS valid
+            FROM detail_projet.type_erreur te
+            JOIN detail_projet.etape_qualite eq 
+                ON te.id_projet = eq.id_projet
+            LEFT JOIN detail_projet.erreur_valable ev 
+                ON ev.id_etape_qualite = eq.id_etape_qualite 
+                AND ev.id_type_erreur = te.id_type_erreur
+            WHERE te.id_projet = $1
+            order by ev.id_type_erreur 
+            `,[id_projet]);
             if (result.rowCount == 0) {
                 result = await pool!.query(`
                     SELECT id_type_erreur, libelle AS libelle_erreur, coef, est_majeur, raccourci, id_projet
