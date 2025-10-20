@@ -17,6 +17,15 @@ export class ProjetRepository {
         }
     }
 
+    static async getAllTypePointage(): Promise<any> {
+        try {
+            const result = await pool!.query(`SELECT * FROM "detail_projet".type_pointage`);
+            return result.rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
  
     static async verifier(ligne: string, plan: string, fonction: string) {
         try {

@@ -94,6 +94,8 @@ router.get('/projets/:annee', catchAsync(ProjetController.getProjetActifAnnuel))
 
 router.get('/projets', catchAsync(ProjetController.getAll))
 
+router.get('/type-pointages', catchAsync(ProjetController.getAllTypePointages))
+
 router.get('/client/:id', catchAsync(ClientController.getById))
 
 router.post('/duplicate', catchAsync(ProjetController.duplicateErrorType))

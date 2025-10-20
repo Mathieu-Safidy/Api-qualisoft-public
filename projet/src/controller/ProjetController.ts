@@ -126,4 +126,13 @@ export class ProjetController {
         }
     
     }
+
+    static async getAllTypePointages(req: Request, res: Response) {
+        try {
+            const result = await ProjetRepository.getAllTypePointage();
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Erreur lors de la récupération des types de pointages', error });
+        }
+    }
 }
