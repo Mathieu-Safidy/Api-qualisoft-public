@@ -7,10 +7,10 @@ on:
 env:
   APP_NAME: qualisoft-microservice
   REGISTRY_HOST: ${{ secrets.REGISTRY_HOST }}
-  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  REGISTRY_USERNAME: mathieusafidy
   REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
   IMAGE_TAG: ${{ github.sha }}
-  IMAGE_FULL_TAG: ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/qualisoft-microservice:${{ github.sha }}
+  IMAGE_FULL_TAG: ${{ secrets.REGISTRY_HOST }}/mathieusafidy/qualisoft-microservice:${{ github.sha }}
   # REMOTE_K8S_MANIFESTS_DIR: ${{ secrets.REMOTE_K8S_MANIFESTS_DIR }}/${{ secrets.REGISTRY_USERNAME }}/qualisoft-microservice:${{ github.sha }}
   K8S_CONTROL_PLANE: ${{ secrets.K8S_CONTROL_PLANE }}
   PROCESSED_K8S_DIR: _k8s_processed
@@ -32,7 +32,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ${{ env.REGISTRY_HOST }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
+          username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Build and push image
