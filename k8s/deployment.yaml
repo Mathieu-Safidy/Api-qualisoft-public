@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: {{APP_NAME}}
-          image: {{REGISTRY_HOST}}/{{REGISTRY_USERNAME}}/{{APP_NAME}}:latest
+          image: {{IMAGE_FULL_TAG}}
           ports:
             - containerPort: {{CONTAINER_PORT}}
               # hostPort: 80 # To allow deployment to be accessed via port 80 explicitly for testing
