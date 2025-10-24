@@ -8,7 +8,8 @@ env:
   APP_NAME: qualisoft-microservice
   REGISTRY_HOST: ${{ secrets.REGISTRY_HOST }}
   IMAGE_TAG: ${{ github.sha }}
-  REMOTE_K8S_MANIFESTS_DIR: ${{ secrets.REMOTE_K8S_MANIFESTS_DIR }}/${{ secrets.REGISTRY_USERNAME }}/qualisoft-microservice:${{ github.sha }}
+  IMAGE_FULL_TAG: ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/qualisoft-microservice:${{ github.sha }}
+  # REMOTE_K8S_MANIFESTS_DIR: ${{ secrets.REMOTE_K8S_MANIFESTS_DIR }}/${{ secrets.REGISTRY_USERNAME }}/qualisoft-microservice:${{ github.sha }}
   K8S_CONTROL_PLANE: ${{ secrets.K8S_CONTROL_PLANE }}
   PROCESSED_K8S_DIR: _k8s_processed
   IMAGE_NAME: qualisoft-microservice
@@ -39,7 +40,7 @@ jobs:
           file: ./projet/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.REGISTRY_HOST }}/${{ env.APP_NAME }}
+          tags: ${{ env.IMAGE_FULL_TAG }}
           network: host
 
   deploy:
@@ -71,6 +72,7 @@ jobs:
               $content = $content -replace '{{APP_NAME}}', $env:APP_NAME
               $content = $content -replace '{{APP_ROUTE}}', $env:APP_ROUTE
               $content = $content -replace '{{NAMESPACE}}', $env:NAMESPACE
+              $content = $content -replace '{{IMAGE_FULL_TAG}}', $env:IMAGE_FULL_TAG
               $content = $content -replace '{{SERVICE_PORT}}', "$($env:SERVICE_PORT)"
               $content = $content -replace '{{CONTAINER_PORT}}', "$($env:CONTAINER_PORT)"
               $outputFile = Join-Path $env:PROCESSED_K8S_DIR $filename
