@@ -52,6 +52,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Check variables
+        run: |
+          echo ${{ secrets.REGISTRY_HOST }}
+          echo ${{ secrets.REGISTRY_USERNAME }}
+          echo ${{ secrets.REGISTRY_PASSWORD }}
+
       - name: Ensure Namespace Exists
         shell: powershell
         run: |
