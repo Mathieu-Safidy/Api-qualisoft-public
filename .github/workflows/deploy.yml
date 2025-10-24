@@ -7,6 +7,8 @@ on:
 env:
   APP_NAME: qualisoft-microservice
   REGISTRY_HOST: ${{ secrets.REGISTRY_HOST }}
+  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
   IMAGE_TAG: ${{ github.sha }}
   IMAGE_FULL_TAG: ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/qualisoft-microservice:${{ github.sha }}
   # REMOTE_K8S_MANIFESTS_DIR: ${{ secrets.REMOTE_K8S_MANIFESTS_DIR }}/${{ secrets.REGISTRY_USERNAME }}/qualisoft-microservice:${{ github.sha }}
