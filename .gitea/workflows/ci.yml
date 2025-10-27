@@ -55,7 +55,7 @@ jobs:
       - name: Process Kubernetes Manifests
         run: |
           echo "${{ secrets.QUALISOFT_SECRET_MANIFEST }}" >> ${{ env.K8S_MANIFESTS_FOLDER }}/qualisoft-secret.yaml
-          mkdir -p ${{ env.PROCESSED_K8S_DIR }}
+          New-Item -ItemType Directory -Force -Path $env:PROCESSED_K8S_DIR
           for file in ${{ env.K8S_MANIFESTS_FOLDER }}/*.yaml; do
             filename=$(basename "$file")
             sed -e "s|{{REGISTRY_HOST}}|${{ env.REGISTRY_HOST }}|g" \
@@ -87,12 +87,12 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             mkdir -p ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace-and-secrets
-            mkdir -p ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/monitoring
+            # mkdir -p ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/monitoring
             kubectl get secret regcred --namespace default -o yaml > ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace-and-secrets/regcred.yaml    # Get the default secret in the namespace for pulling
             sed -i "s|default|${{ env.NAMESPACE }}|g" ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace-and-secrets/regcred.yaml   # Modify the namespace in the file to not be default
             mv ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace.yaml ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace-and-secrets/namespace.yaml
             find ${{ env.REMOTE_K8S_MANIFESTS_DIR }} -type f -name "*-secret.yaml" -exec mv {} ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace-and-secrets/ \;
-            find ${{ env.REMOTE_K8S_MANIFESTS_DIR }} -type f -name "*-monitor.yaml" -exec mv {} ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/monitoring/ \;  # Move monitoring related files to monitoring
+            # find ${{ env.REMOTE_K8S_MANIFESTS_DIR }} -type f -name "*-monitor.yaml" -exec mv {} ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/monitoring/ \;  # Move monitoring related files to monitoring
       - name: Delete currently applied manifests
         uses: appleboy/ssh-action@master
         with:
@@ -102,7 +102,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             kubectl delete -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace-and-secrets/regcred.yaml 2> /dev/null || true # Delete secret to avoid override
-            kubectl delete -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/monitoring/ 2> /dev/null || true # Delete secret to avoid override
+            # kubectl delete -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/monitoring/ 2> /dev/null || true # Delete secret to avoid override
             kubectl delete -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/ 2> /dev/null || true  # Deploying deployment and services
       - name: Apply Kubernetes Manifests on Control Plane via SSH
         uses: appleboy/ssh-action@master
@@ -113,8 +113,8 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             kubectl apply -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace-and-secrets/
-            kubectl apply -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/     # Deploying deployment and services
-            kubectl apply -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/monitoring/ 2> /dev/null || true # Run service monitor last
+            # kubectl apply -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/     # Deploying deployment and services
+            # kubectl apply -f ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/monitoring/ 2> /dev/null || true # Run service monitor last
             rm ${{ env.REMOTE_K8S_MANIFESTS_DIR }}/namespace-and-secrets/qualisoft-secret.yaml
       - name: Upload K8s manifests artifacts
         uses: actions/upload-artifact@v3
@@ -123,34 +123,34 @@ jobs:
           path: ${{env.PROCESSED_K8S_DIR}}
           retention-days: 2
   # Job to send success notification
-  notify_success:
-    # runs-on: ubuntu-22.04
-    needs:
-      - build # This job depends on 'build'
-      - deploy # This job depends on 'deploy'
-    if: success() && always() # Run only if 'build' succeeded AND if the 'always()' context is met
-    uses: ./.gitea/workflows/notifications.yml # Path to your reusable workflow
-    with:
-      status: success
-      repository: ${{ github.repository }}
-      branch: ${{ github.ref }}
-      run_id: ${{ github.run_id }}
-      actor: ${{ github.actor }}
-    secrets:
-      EMAIL_NOTIFICATION_TOKEN: ${{ secrets.EMAIL_NOTIFICATION_TOKEN }}
-  # Job to send failure notification
-  notify_failure:
-    # runs-on: ubuntu-22.04
-    needs:
-      - build # This job depends on 'build'
-      - deploy # This job depends on 'build'
-    if: failure() && always() # Run only if 'build' failed AND if the 'always()' context is met
-    uses: ./.gitea/workflows/notifications.yml
-    with:
-      status: failure
-      repository: ${{ github.repository }}
-      branch: ${{ github.ref }}
-      run_id: ${{ github.run_id }}
-      actor: ${{ github.actor }}
-    secrets:
-      EMAIL_NOTIFICATION_TOKEN: ${{ secrets.EMAIL_NOTIFICATION_TOKEN }}
+  # notify_success:
+  #   # runs-on: ubuntu-22.04
+  #   needs:
+  #     - build # This job depends on 'build'
+  #     - deploy # This job depends on 'deploy'
+  #   if: success() && always() # Run only if 'build' succeeded AND if the 'always()' context is met
+  #   uses: ./.gitea/workflows/notifications.yml # Path to your reusable workflow
+  #   with:
+  #     status: success
+  #     repository: ${{ github.repository }}
+  #     branch: ${{ github.ref }}
+  #     run_id: ${{ github.run_id }}
+  #     actor: ${{ github.actor }}
+  #   secrets:
+  #     EMAIL_NOTIFICATION_TOKEN: ${{ secrets.EMAIL_NOTIFICATION_TOKEN }}
+  # # Job to send failure notification
+  # notify_failure:
+  #   # runs-on: ubuntu-22.04
+  #   needs:
+  #     - build # This job depends on 'build'
+  #     - deploy # This job depends on 'build'
+  #   if: failure() && always() # Run only if 'build' failed AND if the 'always()' context is met
+  #   uses: ./.gitea/workflows/notifications.yml
+  #   with:
+  #     status: failure
+  #     repository: ${{ github.repository }}
+  #     branch: ${{ github.ref }}
+  #     run_id: ${{ github.run_id }}
+  #     actor: ${{ github.actor }}
+  #   secrets:
+  #     EMAIL_NOTIFICATION_TOKEN: ${{ secrets.EMAIL_NOTIFICATION_TOKEN }}
