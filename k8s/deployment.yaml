@@ -27,7 +27,7 @@ spec:
               value: production
             - name: MICROSERVICE_NAME
               value: Qualisoft Microservice
-            - name: DATABASE_URL
+            - name: DATABASE_URLex
               valueFrom:
                 secretKeyRef:
                   name: qualisoft-secret
@@ -41,7 +41,7 @@ spec:
             - name: RBAC_API
               value: http://192.168.12.170/luminess-rbac-microservice
             - name: ALLOWED_ORIGINS
-              value: "http://localhost:4200, http://localhost:5000, http://localhost:8080"
+              value: "http://localhost:4200,http://localhost:5000,http://localhost:8080,http://172.22.228.143"
           #     valueFrom:
           #       secretKeyRef:
           #         name: {{APP_SECRET_NAME}}
